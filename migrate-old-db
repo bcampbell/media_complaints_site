@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+import os
+import sys
+import datetime
+
+from django.core.management import setup_environ
+import settings
+
+setup_environ(settings)
+
+from django.core.exceptions import ObjectDoesNotExist
+
+from issues.models import *
+
+import MySQLdb
+import MySQLdb.cursors
+
+_conn = None
+
+
+
+def add_complaint( row ):
+
+    issue = Issue()
+    if row['checked']:
+        issue.checked = True
+    else:
+        issue.checked = False
+    issue.legacy_id = int(row['id'])
+    issue.title = row['complaint_title'].decode( 'utf-8' )
+    issue.description = row['complaint'].decode( 'utf-8' )
+    issue.response = row['response'].decode( 'utf-8' )
+    issue.outcome_keyword = row['outcome_keyword'].decode( 'utf-8' )
+
+    issue.complaint_body = Entity.objects.get( name='PCC' )
+
+    issue.date_of_problem = datetime.date.today()
+
+    code_concat = ','.join( [ row[f] for f in ('code','code_1','code_2','code_3' ) if row[f] ] )
+    codes = set( [ c.strip() for c in code_concat.split(',') ] )
+
+    pcc_codes = []
+    for c in codes:
+        pcc_code = None
+        try:
+            n = int( c )
+            pcc_code = ComplaintCode.objects.get( pk=n )
+        except ValueError:
+            pass
+        except ObjectDoesNotExist:
+            pass
+        if pcc_code is None:
+            print "%s: bad complaint_code (%s)" % (row['id'],c)
+            continue
+        else:
+            pcc_codes.append( pcc_code)
+
+    issue.save()
+    issue.codes.add( *pcc_codes )
+#    print "added."
+
+#    keyword_concat = ','.join( [ row[f] for f in ('complaint_keyword','complaint_keyword_2','complaint_keyword_3' ) if row[f] ] )
+#    keywords = set( [ k.strip() for k in keyword_concat.split(',') ] )
+#    print keywords
+
+#    issue.save()
+
+
+#    complainant
+#    complaint_about
+#    complaint_about_2
+
+#date_of_problem
+#complaint_keyword
+#complaint_keyword_2
+#complaint_keyword_3
+
+# decision_and_explanation
+# decision_and_explanation_2
+
+#    sys.exit(0)
+
+
+
+
+def main():
+    global _conn
+    _conn = MySQLdb.connect( host = "",
+                            user = "root",
+                            passwd = "",
+                            db = "complaints",
+                            cursorclass=MySQLdb.cursors.DictCursor )
+
+    cursor = _conn.cursor()
+    cursor.execute ("SELECT * FROM complaints WHERE complaint_body='PCC'")
+    for row in cursor:
+        add_complaint( row )
+    cursor.close()
+    _conn.close()
+
+
+main()
+
