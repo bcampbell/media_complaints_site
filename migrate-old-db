@@ -26,59 +26,75 @@ def add_complaint( row ):
         issue.checked = True
     else:
         issue.checked = False
-    issue.legacy_id = int(row['id'])
+
+    print "id: ", row['id']
+    issue.id = int(row['id'])
+
     issue.title = row['complaint_title'].decode( 'utf-8' )
     issue.description = row['complaint'].decode( 'utf-8' )
     issue.response = row['response'].decode( 'utf-8' )
     issue.outcome_keyword = row['outcome_keyword'].decode( 'utf-8' )
+    issue.decision_and_explanation = row['decision_and_explanation'].decode('utf-8')
+    issue.decision_and_explanation_2 = row['decision_and_explanation_2'].decode('utf-8')
 
-    issue.complaint_body = Entity.objects.get( name='PCC' )
+    issue.complaint_body, created = Entity.objects.get_or_create( name=row['complaint_body'], kind='c' )
+    issue.complaint_body.save()
 
+    ####################
+    # TODO:
+    # fix up date_of_problem
+    ####################
     issue.date_of_problem = datetime.date.today()
 
+
+    # complaint codes violated
     code_concat = ','.join( [ row[f] for f in ('code','code_1','code_2','code_3' ) if row[f] ] )
     codes = set( [ c.strip() for c in code_concat.split(',') ] )
 
-    pcc_codes = []
+    # check all the complaint codes, store them for later adding (m2m)
+    pcc_codes_objs = []
     for c in codes:
-        pcc_code = None
-        try:
-            n = int( c )
-            pcc_code = ComplaintCode.objects.get( pk=n )
-        except ValueError:
-            pass
-        except ObjectDoesNotExist:
-            pass
-        if pcc_code is None:
-            print "%s: bad complaint_code (%s)" % (row['id'],c)
-            continue
-        else:
-            pcc_codes.append( pcc_code)
+        code, created = ComplaintCode.objects.get_or_create( clause=c )
+        code.save()
+        pcc_codes_objs.append( code )
 
+    # resolve/create all the keywords
+    keyword_objs = []
+    keyword_concat = ','.join( [ row[f] for f in ('complaint_keyword','complaint_keyword_2','complaint_keyword_3' ) if row[f] ] ).decode('utf-8')
+    keywords = set( [ k.strip() for k in keyword_concat.split(',') ] )
+    for k in keywords:
+        kw, created = Keyword.objects.get_or_create( name=k )
+        kw.save()
+        keyword_objs.append(kw)
+
+    # complainants
+
+    complainant_objs = []
+    if row['complainant'].strip != '':
+        c,created = Entity.objects.get_or_create( name=row['complainant'].decode('utf-8'), kind='p' )
+        complainant_objs.append( c )
+        c.save()
+
+    complaint_about_objs = []
+
+    if row['complaint_about'].strip != '':
+        about,created = Entity.objects.get_or_create( name=row['complaint_about'].decode('utf-8'), kind='m' )
+        complaint_about_objs.append( about )
+        about.save()
+
+    if row['complaint_about_2'].strip != '':
+        about,created = Entity.objects.get_or_create( name=row['complaint_about_2'].decode('utf-8'), kind='m' )
+        complaint_about_objs.append( about )
+        about.save()
+
+    # need to save it before we can add the m2m fields
     issue.save()
-    issue.codes.add( *pcc_codes )
-#    print "added."
 
-#    keyword_concat = ','.join( [ row[f] for f in ('complaint_keyword','complaint_keyword_2','complaint_keyword_3' ) if row[f] ] )
-#    keywords = set( [ k.strip() for k in keyword_concat.split(',') ] )
-#    print keywords
+    issue.codes.add( *pcc_codes_objs )
+    issue.keywords.add( *keyword_objs )
+    issue.complainants.add( *complainant_objs )
+    issue.about.add( *complaint_about_objs )
 
-#    issue.save()
-
-
-#    complainant
-#    complaint_about
-#    complaint_about_2
-
-#date_of_problem
-#complaint_keyword
-#complaint_keyword_2
-#complaint_keyword_3
-
-# decision_and_explanation
-# decision_and_explanation_2
-
-#    sys.exit(0)
 
 
 

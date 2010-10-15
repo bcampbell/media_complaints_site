@@ -13,29 +13,30 @@ class Entity( models.Model ):
     def __unicode__(self):
         return self.name
 
-class Tag( models.Model ):
+class Keyword( models.Model ):
     name = models.CharField(max_length=64)
     def __unicode__(self):
         return self.name
 
 class ComplaintCode( models.Model ):
-    name = models.CharField(max_length=64)
+
+    clause = models.CharField(max_length=64)
+    prettyname = models.CharField(max_length=512)
     def __unicode__(self):
-        return self.name
+        return u"%s (%s)" % (self.clause, self.prettyname)
 
 
 class Issue(models.Model):
     """ an issue reported to a body (eg someone complaining to the PCC) """
     checked = models.BooleanField()
-    legacy_id = models.IntegerField( null=True )
     complaint_body = models.ForeignKey( Entity, related_name='issue_complaint_bodies', limit_choices_to={'kind':'c'} )
     title = models.CharField( max_length=512 )
-    complainant = models.ManyToManyField( Entity, related_name='issue_complainants' )
-    about = models.ManyToManyField( Entity, related_name='issue_abouts' )
+    complainants = models.ManyToManyField( Entity, related_name='issue_complainants', limit_choices_to={'kind':'p'} )
+    about = models.ManyToManyField( Entity, related_name='issue_abouts', limit_choices_to={'kind':'m'}  )
     date_of_problem = models.DateField()
     description = models.TextField(blank=True)
 
-    tags = models.ManyToManyField( Tag, blank=True )
+    keywords = models.ManyToManyField( Keyword, blank=True )
     codes = models.ManyToManyField( ComplaintCode, blank=True  )
 
     response = models.TextField(blank=True)
