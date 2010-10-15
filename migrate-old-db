@@ -27,7 +27,6 @@ def add_complaint( row ):
     else:
         issue.checked = False
 
-    print "id: ", row['id']
     issue.id = int(row['id'])
 
     issue.title = row['complaint_title'].decode( 'utf-8' )
@@ -54,6 +53,19 @@ def add_complaint( row ):
     # check all the complaint codes, store them for later adding (m2m)
     pcc_codes_objs = []
     for c in codes:
+        if c=='None':
+            continue
+
+        # sanity check
+        n=None
+        try:
+            n = int(c)
+        except ValueError:
+            pass
+        if n is None or n<1 or n>16:
+            print "id %s: Bad complaint_code '%s'" % ( row['id'], c )
+            continue
+
         code, created = ComplaintCode.objects.get_or_create( clause=c )
         code.save()
         pcc_codes_objs.append( code )
