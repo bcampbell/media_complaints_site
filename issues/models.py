@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Entity( models.Model ):
     """ eg Fred Bloggs, The Daily Mail, Ofcom """
     name = models.CharField( max_length=255 )
@@ -18,12 +17,20 @@ class Keyword( models.Model ):
     def __unicode__(self):
         return self.name
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('keyword', (), { 'kw': self.name })
+
 class ComplaintCode( models.Model ):
 
     clause = models.CharField(max_length=64)
     prettyname = models.CharField(max_length=512)
     def __unicode__(self):
         return u"%s (%s)" % (self.clause, self.prettyname)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('clause', (), { 'clause': self.clause })
 
 
 class Issue(models.Model):
@@ -54,4 +61,8 @@ class Issue(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('issue-detail', (), { 'issue_id': self.id })
 

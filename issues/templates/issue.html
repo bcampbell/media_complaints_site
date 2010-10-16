@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}{{ issue.id }} - {{ issue.title }}{% endblock %}
+
+{% block content %}
+<h2>{{ issue.id }} - {{ issue.title }}</h2>
+<table border=0>
+
+<td width="50%" valign="top">
+        <h3>The complaint</h3>
+        <em>{{issue.title}}</em>
+        <p>{{issue.description}}</p>
+
+        <h3>Newspaper's response</h3>
+        <p>{{issue.response}}</p>
+
+        <h3>Case outcome</h3>
+        <p>{{issue.decision_and_explanation}}</p>
+</td>
+
+<td width="25%" valign="top">
+        <h3>Similar cases</h3>
+        <ul>
+            {% for related in issue.related.all %}
+            <li><a href="{{ related.get_absolute_url }}">{{related.title}}</a></li>
+            {% endfor %}
+        </ul>
+
+        <h3>Articles about this</h3>
+        
+        <h3>View more</h3>
+</td>
+
+<td width="25%" valign="top" style="border: 1px solid black;">
+        <h3>Case summary<h3>
+        <h4>Clause<h4>
+        <ul>
+            {% for code in issue.codes.all %}
+            <li><a href="{{ code.get_absolute_url }}">{{code.clause}} - {{code.prettyname}}</a></li>
+            {% endfor %}
+        </ul>
+        <h4>Keywords</h4>
+        <ul>
+            {% for kw in issue.keywords.all %}
+            <li><a href="{{ kw.get_absolute_url }}">{{kw.name}}</a></li>
+            {% endfor %}
+        </ul>
+</td>
+</tr>
+</table>
+
+{% endblock %}

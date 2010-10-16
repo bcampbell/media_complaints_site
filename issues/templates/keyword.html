@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ kw.name }}{% endblock %}
+
+{% block content %}
+<h2>{{ kw.name}}</h2>
+
+<p>cases marked <em>{{ kw.name }}</em>:</p>
+<ul>
+    {% for issue in kw.issue_set.all %}
+    <li><a href="{{ issue.get_absolute_url }}">{{issue.title}}</a></li>
+    {% endfor %}
+</ul>
+
+
+{% endblock %}
