@@ -12,17 +12,17 @@ class Entity( models.Model ):
     def __unicode__(self):
         return self.name
 
-class Keyword( models.Model ):
+class Tag( models.Model ):
     name = models.CharField(max_length=64)
     def __unicode__(self):
         return self.name
 
     @models.permalink
     def get_absolute_url(self):
-        return ('keyword', (), { 'kw': self.name })
+        return ('tag', (), { 'tag': self.name })
 
 class ComplaintCode( models.Model ):
-
+    """ which code of conduct was (allegedly) violated """
     clause = models.CharField(max_length=64)
     prettyname = models.CharField(max_length=512)
     def __unicode__(self):
@@ -33,26 +33,36 @@ class ComplaintCode( models.Model ):
         return ('clause', (), { 'clause': self.clause })
 
 
+class Outcome( models.Model ):
+    """ eg "resolved" "adjudicated" etc... """
+    name = models.CharField( max_length=64 )
+    def __unicode__(self):
+        return self.name
+
+
+
+
 class Issue(models.Model):
     """ an issue reported to a body (eg someone complaining to the PCC) """
     checked = models.BooleanField()
+
+
     complaint_body = models.ForeignKey( Entity, related_name='issue_complaint_bodies', limit_choices_to={'kind':'c'} )
-    title = models.CharField( max_length=512 )
+    title = models.CharField( max_length=512, blank=True )
     complainants = models.ManyToManyField( Entity, related_name='issue_complainants', limit_choices_to={'kind':'p'} )
-    about = models.ManyToManyField( Entity, related_name='issue_abouts', limit_choices_to={'kind':'m'}  )
-    date_of_problem = models.DateField()
+    complaining_about = models.ManyToManyField( Entity, related_name='issue_abouts', limit_choices_to={'kind':'m'}  )
+    date_of_problem = models.DateField(null=True)
     description = models.TextField(blank=True)
 
-    keywords = models.ManyToManyField( Keyword, blank=True )
+    # eg article_id of the case as published in the PCC CMS system
+    legacy_id = models.CharField( max_length=512 )
+
+    tags = models.ManyToManyField( Tag, blank=True )
     codes = models.ManyToManyField( ComplaintCode, blank=True  )
 
-    response = models.TextField(blank=True)
-
-    outcome_keyword = models.CharField(max_length=255,blank=True)
-
-    decision_and_explanation = models.TextField(blank=True)
-
+    outcome = models.ForeignKey( Outcome, null=True )
     date_of_decision = models.DateField(null=True)
+
 
     url_of_story = models.URLField(max_length=512, verify_exists=False, blank=True)
     url_of_complaint = models.URLField(max_length=512, verify_exists=False, blank=True)
@@ -60,9 +70,16 @@ class Issue(models.Model):
     related = models.ManyToManyField( "self",blank=True )
 
     def __unicode__(self):
-        return self.title
+        return "%s - %s" % (self.id, self.title)
 
     @models.permalink
     def get_absolute_url(self):
         return ('issue-detail', (), { 'issue_id': self.id })
+
+
+
+class Detail( models.Model ):
+    issue = models.ForeignKey( Issue )
+    content = models.TextField()
+    kind = models.CharField( max_length=32 )
 

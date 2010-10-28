@@ -5,6 +5,7 @@
 {% block content %}
 <h2>{{ code.clause}} - {{code.prettyname}}</h2>
 
+Cases filed against this code:<br/>
 <ul>
     {% for issue in code.issue_set.all %}
     <li><a href="{{ issue.get_absolute_url }}">{{issue.title}}</a></li>

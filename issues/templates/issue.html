@@ -9,13 +9,18 @@
 <td width="50%" valign="top">
         <h3>The complaint</h3>
         <em>{{issue.title}}</em>
-        <p>{{issue.description}}</p>
-
-        <h3>Newspaper's response</h3>
-        <p>{{issue.response}}</p>
+        <p>{{issue.description|linebreaksbr}}</p>
 
         <h3>Case outcome</h3>
-        <p>{{issue.decision_and_explanation}}</p>
+        {% if issue.outcome %}
+        <p>{{issue.outcome.name}}</p>
+        {% endif %}
+
+        {% for detail in issue.detail_set.all %}
+        <h3>{{detail.kind|title}}</h3>
+        <p>{{detail.content|linebreaksbr}}</p>
+        {% endfor %}
+
 </td>
 
 <td width="25%" valign="top">
@@ -39,10 +44,10 @@
             <li><a href="{{ code.get_absolute_url }}">{{code.clause}} - {{code.prettyname}}</a></li>
             {% endfor %}
         </ul>
-        <h4>Keywords</h4>
+        <h4>Tags</h4>
         <ul>
-            {% for kw in issue.keywords.all %}
-            <li><a href="{{ kw.get_absolute_url }}">{{kw.name}}</a></li>
+            {% for tag in issue.tags.all %}
+            <li><a href="{{ tag.get_absolute_url }}">{{tag.name}}</a></li>
             {% endfor %}
         </ul>
 </td>

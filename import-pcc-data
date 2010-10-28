@@ -1,0 +1,320 @@
+#!/usr/bin/env python
+#
+# import complaints from the PCC website, using the scraperwiki pcc-decisions scraper
+#
+import os
+import sys
+import datetime
+import urllib
+import urllib2
+import json
+import pprint
+import dateutil.parser
+import MySQLdb
+import MySQLdb.cursors
+import re
+
+from django.core.management import setup_environ
+import settings
+
+setup_environ(settings)
+
+from django.core.exceptions import ObjectDoesNotExist
+
+from issues.models import *
+
+
+_conn = None
+
+
+
+
+def slurp_batch( offset, limit ):
+
+    url = "http://api.scraperwiki.com/api/1.0/datastore/getdata"
+
+    params = { 'format': 'json',
+        'name': 'pcc-decisions',
+        'limit': str(limit),
+        'offset': str(offset) }
+    url = url + "?" + urllib.urlencode( params )
+    f = urllib2.urlopen( url )
+    json_data = f.read()
+#    print json_data
+
+#    print "\n\n----------\n\n"
+    out = json.loads( json_data )
+    return out
+
+
+
+def extract_pubdate( pubdate_str ):
+
+    # a lot of (older) pcc cases have no date, only the number of
+    # the pcc report in which they were published, which covers a
+    # particular time period.
+    pcc_reports = {
+        # reportnumber: (start_date, end_date),
+        1: ( "1/11/1987", "31/1/1988" ),
+        2: ( "1/2/1988", "30/4/1988" ),
+        3: ( "1/5/1988", "31/7/1988" ),
+        4: ( "1/8/1988", "31/10/1988" ),
+        5: ( "1/11/1988", "31/1/1989" ),
+        6: ( "1/2/1989", "30/4/1989" ),
+        7: ( "1/5/1989", "31/7/1989" ),
+        8: ( "1/8/1989", "31/10/1989" ),
+        9: ( "1/11/1989", "31/1/1990" ),
+        10: ( "1/2/1990", "30/4/1990" ),
+        11: ( "1/5/1990", "31/7/1990" ),
+        12: ( "1/8/1990", "31/10/1990" ),
+        13: ( "1/11/1990", "31/1/1991" ),
+        14: ( "1/2/1991", "30/4/1991" ),
+        15: ( "1/5/1991", "31/7/1991" ),
+        16: ( "1/8/1991", "31/10/1991" ),
+        17: ( "1/11/1991", "31/1/1992" ),
+        18: ( "1/2/1992", "30/4/1992" ),
+        19: ( "1/5/1992", "31/7/1992" ),
+        20: ( "1/8/1992", "31/10/1992" ),
+        21: ( "1/11/1992", "31/1/1993" ),
+        22: ( "1/2/1993", "30/4/1993" ),
+        23: ( "1/5/1993", "31/7/1993" ),
+        24: ( "1/8/1993", "31/10/1993" ),
+        25: ( "1/11/1993", "31/1/1994" ),
+        26: ( "1/2/1994", "30/4/1994" ),
+        27: ( "1/5/1994", "31/7/1994" ),
+        28: ( "1/8/1994", "31/10/1994" ),
+        29: ( "1/11/1994", "31/1/1995" ),
+        30: ( "1/2/1995", "30/4/1995" ),
+        31: ( "1/5/1995", "31/7/1995" ),
+        32: ( "1/8/1995", "31/10/1995" ),
+        33: ( "1/11/1995", "31/1/1996" ),
+        34: ( "1/2/1996", "30/4/1996" ),
+        35: ( "1/5/1996", "31/7/1996" ),
+        36: ( "1/8/1996", "31/10/1996" ),
+        37: ( "1/11/1996", "31/1/1997" ),
+        38: ( "1/2/1997", "30/4/1997" ),
+        39: ( "1/5/1997", "31/7/1997" ),
+        40: ( "1/8/1997", "31/10/1997" ),
+        41: ( "1/11/1997", "31/1/1998" ),
+        42: ( "1/2/1998", "30/4/1998" ),
+        43: ( "1/5/1998", "31/7/1998" ),
+        44: ( "1/8/1998", "31/10/1998" ),
+        45: ( "1/11/1998", "31/1/1999" ),
+        46: ( "1/2/1999", "30/4/1999" ),
+        47: ( "1/5/1999", "31/7/1999" ),
+        48: ( "1/8/1999", "31/10/1999" ),
+        49: ( "1/11/1999", "31/1/2000" ),
+        50: ( "1/2/2000", "30/4/2000" ),
+        51: ( "1/5/2000", "31/7/2000" ),
+        52: ( "1/8/2000", "31/10/2000" ),
+        53: ( "1/11/2000", "31/1/2001" ),
+        54: ( "1/2/2001", "30/4/2001" ),
+        55: ( "1/5/2001", "31/7/2001" ),
+        56: ( "1/8/2001", "31/10/2001" ),
+        57: ( "1/11/2001", "31/1/2002" ),
+        58: ( "1/2/2002", "30/4/2002" ),
+        59: ( "1/5/2002", "31/7/2002" ),
+        60: ( "1/8/2002", "31/10/2002" ),
+        61: ( "1/11/2002", "31/1/2003" ),
+        62: ( "1/2/2003", "30/4/2003" ),
+        63: ( "1/5/2003", "31/7/2003" ),
+        64: ( "1/8/2003", "31/10/2003" ),
+        65: ( "1/11/2003", "31/1/2004" ),
+        66: ( "1/2/2004", "30/4/2004" ),
+        67: ( "1/5/2004", "31/7/2004" ),
+        68: ( "1/8/2004", "31/10/2004" ),
+        69: ( "1/11/2004", "31/1/2005" ),
+        70: ( "1/2/2005", "30/4/2005" ),
+        71: ( "1/5/2005", "31/10/2005" ),
+        72: ( "1/11/2005", "30/4/2006" ),
+        73: ( "1/5/2006", "31/10/2006" ),
+        74: ( "1/11/2006", "30/4/2007" ),
+        75: ( "1/5/2007", "30/9/2007" ),
+        76: ( "1/10/2007", "31/3/2008" ),
+        77: ( "1/4/2008", "30/9/2008" ),
+        78: ( "1/10/2008", "31/3/2009" ),
+        79: ( "1/4/2009", "30/9/2009" ),
+        80: ( "1/10/2009", "31/12/2009" ),
+    }
+
+    # sometimes just a report number eg "75"
+    if pubdate_str.isdigit():
+        # if case has only a report number, set the publication date to
+        # the end of the report period.
+        # cheesy, but more useful than no date.
+        reportnum = int( pubdate_str )
+        pubdate_str = pcc_reports[reportnum][1]
+    else:
+        # sometimes a report number and an adjudication date, or just some cruft text...
+        # eg:
+        # '80 Adjudication issued 23/12/09' => "23/12/09"
+        # '80 Adjudication issed 18/12/09' => "18/12/09"
+        # 'Date published 27/09/2010'
+        pat = re.compile( r'(\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4})', re.IGNORECASE )
+        m = pat.search( pubdate_str )
+        if m:
+            pubdate_str = m.group(1)
+
+    return dateutil.parser.parse( pubdate_str, dayfirst=True )  # fuzzy=True
+
+
+def process( c ):
+    if not 'url' in c:
+        return
+
+    # don't add ones we've already got
+    existing = Issue.objects.filter( legacy_id = str(c['id']) )
+    if existing:
+        return
+
+    # incoming fields:
+    #
+    # Date_Published    u'18/11/08',
+    # Decision          u'Upheld', (if adjudicated)
+    # Adjudication      text (if adjudicated)
+    # Resolution        text (if resolved)
+    # Publication       u'News of the World',
+    # Report            eg "78 Adjudication issued 18/11/08'
+    # date_scraped      eg u'2010-10-27 13:23:08' 
+    # id                article_id from pcc db
+    # url
+    # Complainant_Name
+    # Clauses_Noted
+    # Complaint         text summary
+
+    # to deal with some data borkage
+
+    if c['Clauses_Noted'].strip().lower() == 'none':
+        c['Clauses_Noted'] = u''
+    try:
+        if 'Date_Published' not in c:
+            c['Date_Published'] = c['Report']
+        date_published = extract_pubdate( c['Date_Published'] )
+        assert( date_published is not None )
+    except ValueError:
+        raise Exception( "Bad date: '%s' (%s)" % (c['Date_Published'], c['url']) )
+
+
+    # create the PCC if it doesn't exist ;-)
+    the_pcc, created = Entity.objects.get_or_create( name='PCC', kind='c' )
+    the_pcc.save()
+
+
+    outcome = None
+    if 'Resolution' in c:
+        outcome = u'Resolved'
+    elif 'Decision' in c:
+        assert 'Adjudication' in c
+        outcome = c['Decision']
+    if outcome is None:
+        raise Exception( "%s: couldn't decide outcome" % (c['url']) )
+
+    # create the new issue
+    issue = Issue()
+
+    issue.checked = False
+    issue.legacy_id = str( c['id'] )
+    issue.date_of_decision = date_published
+    issue.url_of_complaint = c['url']
+    issue.description = c['Complaint']
+    issue.complaint_body = the_pcc
+
+    issue.title = u"%s vs %s" % (c['Complainant_Name'],c['Publication'] )
+
+    issue.outcome, created = Outcome.objects.get_or_create( name=outcome )
+    issue.outcome.save()
+
+    # clauses
+    # check and store them for later adding (m2m)
+
+    clauses = set( [ clause.strip() for clause in c['Clauses_Noted'].split(',') ] )
+    pcc_codes_objs = []
+    for clause in clauses:
+        if clause == u'':
+            continue
+        n=None
+        try:
+            n = int(clause)
+        except ValueError:
+            pass
+        if n is None or n<1 or n>16:
+            raise Exception( "%s: Bad complaint_code '%s'" % ( c['url'], clause ) )
+
+        code, created = ComplaintCode.objects.get_or_create( clause=clause )
+        code.save()
+        pcc_codes_objs.append( code )
+
+
+    # complainant
+    complainant_objs = []
+    complainant,created = Entity.objects.get_or_create( name=c['Complainant_Name'], kind='p' )
+    complainant_objs.append( complainant )
+    complainant.save()
+
+    # who they are complaining about
+    complaining_about_objs = []
+    about,created = Entity.objects.get_or_create( name=c['Publication'], kind='m' )
+    complaining_about_objs.append( about )
+    about.save()
+
+    # need to save it before we can add the m2m fields
+    issue.save()
+
+    issue.codes.add( *pcc_codes_objs )
+#    issue.tags.add( *keyword_objs )
+    issue.complainants.add( *complainant_objs )
+    issue.complaining_about.add( *complaining_about_objs )
+
+
+    # now add the details to the issue
+    if "Resolution" in c:
+        resolution = Detail( content=c['Resolution'], kind='resolution', issue=issue )
+        resolution.save()
+    if "Adjudication" in c:
+        adj = Detail( content=c['Adjudication'], kind='adjudication', issue=issue )
+        adj.save()
+
+
+def main():
+    errcnt = 0
+    offset = 0
+    limit = 500
+    while True:
+        batch = slurp_batch( offset, limit )
+        print "got %d" % ( len(batch) )
+        if len( batch ) == 0:
+            break
+
+        for complaint in batch:
+            c = complaint
+
+            res = "nores"
+            if "Resolution" in c:
+                res = "  res"
+            adj = "noadj"
+            if "Adjudication" in c:
+                adj = "  adj"
+            desc = 'nodesc'
+            if "Decision" in c:
+                desc = c['Decision']
+
+#            print "%s %s %s" % ( res, desc, adj )
+
+            try:
+                process( complaint )
+            except Exception, e:
+                print "\n\n---------"
+                print "ERROR: ", e
+                print "---------"
+                pprint.pprint( complaint )
+                print "---------\n\n"
+                errcnt = errcnt+1
+                if errcnt>100:
+                    print "TOO MANY ERRORS"
+                    raise
+
+        offset = offset + limit
+
+
+main()
+

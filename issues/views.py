@@ -12,12 +12,12 @@ def issue_detail(request, issue_id):
     return render_to_response('issue.html', {'issue': issue})
 
 
-def keyword(request, kw):
+def tag(request, tag):
     try:
-        obj = Keyword.objects.get(name=kw)
+        obj = Tag.objects.get(name=tag)
     except Keyword.DoesNotExist:
         raise Http404
-    return render_to_response('keyword.html', {'kw': obj})
+    return render_to_response('tag.html', {'tag': obj})
 
 def complaint_code(request, clause ):
     try:
