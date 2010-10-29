@@ -281,6 +281,12 @@ def process( c ):
 
 
     # complainant
+    # could be more clever and try and identify multiple complaintants, but that's a can of worms:
+    #  "Mr Andrew Rowell, Dr Peter Moore, and Dr Simon Lewis"
+    #  "Lesbian, Gay, Bisexual, Transgender (LGBT) Youth Scotland"
+    #  "Mr Peter Handy, the Executive Director of Kemple View Hospital"
+    #  "Mrs Pauline Dunn on behalf of her niece, Mrs Wendy Barlow"
+    #    etc...
     complainant_objs = []
     complainant,created = Entity.objects.get_or_create( name=c['Complainant_Name'], kind='p' )
     complainant_objs.append( complainant )
@@ -288,11 +294,18 @@ def process( c ):
         complainant.save()
 
     # who they are complaining about
+    # nice and easy to identify multiples:
+
+    publications = re.split( r'\s*/\s*', c['Publication'] )
+#    if len( publications ) >1:
+#        print "multiple publications: ", c['Publication'], "=>", publications
+
     complaining_about_objs = []
-    about,created = Entity.objects.get_or_create( name=c['Publication'], kind='m' )
-    complaining_about_objs.append( about )
-    if created:
-        about.save()
+    for publication in publications:
+        about,created = Entity.objects.get_or_create( name=publication, kind='m' )
+        complaining_about_objs.append( about )
+        if created:
+            about.save()
 
     # need to save it before we can add the m2m fields
     issue.save()
