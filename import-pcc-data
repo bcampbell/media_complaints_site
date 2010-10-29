@@ -187,9 +187,9 @@ def load_pcc_clauses():
     ]
 
     for d in pcc_clauses:
-        code,created = ComplaintCode.objects.get_or_create( clause=d[0], prettyname=d[1] )
+        clause,created = Clause.objects.get_or_create( ident=d[0], prettyname=d[1] )
         if created:
-            code.save()
+            clause.save()
 
 
 def process( c ):
@@ -260,24 +260,15 @@ def process( c ):
 
     # clauses
     # check and store them for later adding (m2m)
-
-    clauses = set( [ clause.strip() for clause in c['Clauses_Noted'].split(',') ] )
-    pcc_codes_objs = []
-    for clause in clauses:
-        if clause == u'':
+    pcc_clause_objs = []
+    clause_idents = set( [ clause.strip() for clause in c['Clauses_Noted'].split(',') ] )
+    for ident in clause_idents:
+        if ident == u'':
             continue
-        n=None
-        try:
-            n = int(clause)
-        except ValueError:
-            pass
-        if n is None or n<1 or n>16:
-            raise Exception( "%s: Bad complaint_code '%s'" % ( c['url'], clause ) )
-
-        code, created = ComplaintCode.objects.get_or_create( clause=clause )
+        clause, created = Clause.objects.get_or_create( ident=ident )
         if created:
-            code.save()
-        pcc_codes_objs.append( code )
+            clause.save()
+        pcc_clause_objs.append( clause )
 
 
     # complainant
@@ -310,7 +301,7 @@ def process( c ):
     # need to save it before we can add the m2m fields
     issue.save()
 
-    issue.codes.add( *pcc_codes_objs )
+    issue.clauses.add( *pcc_clause_objs )
 #    issue.tags.add( *keyword_objs )
     issue.complainants.add( *complainant_objs )
     issue.complaining_about.add( *complaining_about_objs )

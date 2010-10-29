@@ -12,8 +12,14 @@ class Entity( models.Model ):
         ('m', 'Media'),
     )
     kind = models.CharField( max_length=8, choices=ENTITY_KIND_CHOICES )
+
     def __unicode__(self):
         return self.name
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('entity-detail', (), { 'entity_id': self.id })
+
 
 class Tag( models.Model ):
     name = models.CharField(max_length=64)
@@ -22,26 +28,38 @@ class Tag( models.Model ):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('tag', (), { 'tag': self.name })
+        return ('tag-detail', (), { 'tag': self.name })
 
-class ComplaintCode( models.Model ):
+
+class Clause( models.Model ):
     """ which code of conduct was (allegedly) violated """
-    clause = models.CharField(max_length=64)
+
+    # eg PCC clause number, or OfCom rule
+    ident = models.CharField(max_length=64)
+
     prettyname = models.CharField(max_length=512)
+    # TODO: add:
+    # - link to code of practice
+    # - explanation text (use markdown)
+
     def __unicode__(self):
-        return u"%s (%s)" % (self.clause, self.prettyname)
+        return u"%s - %s" % (self.ident, self.prettyname)
 
     @models.permalink
     def get_absolute_url(self):
-        return ('clause', (), { 'clause': self.clause })
+        return ('clause-detail', (), { 'clause_id': self.id })
 
 
 class Outcome( models.Model ):
     """ eg "resolved" "adjudicated" etc... """
     name = models.CharField( max_length=64 )
+
     def __unicode__(self):
         return self.name
 
+#    @models.permalink
+#    def get_absolute_url(self):
+#        return ('outcome-detail', (), { 'outcome_id': self.id })
 
 
 
@@ -64,7 +82,7 @@ class Issue(models.Model):
     report = models.CharField( max_length=32, null=True )
 
     tags = models.ManyToManyField( Tag, blank=True )
-    codes = models.ManyToManyField( ComplaintCode, blank=True  )
+    clauses = models.ManyToManyField( Clause, blank=True  )
 
     outcome = models.ForeignKey( Outcome, null=True )
     date_of_decision = models.DateField(null=True)

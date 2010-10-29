@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ent.name }}{% endblock %}
+
+{% block content %}
+<h2>{{ ent.name }}</h2>
+
+<h3>Complaints against {{ ent.name }}</h3>
+<ul>
+    {% for issue in ent.issue_abouts.all %}
+    <li><a href="{{ issue.get_absolute_url }}">{{issue.title}}</a></li>
+    {% endfor %}
+</ul>
+
+<h3>Complaints made by {{ ent.name }}</h3>
+<ul>
+    {% for issue in ent.issue_complainants.all %}
+    <li><a href="{{ issue.get_absolute_url }}">{{issue.title}}</a></li>
+    {% endfor %}
+</ul>
+
+
+
+{% endblock %}

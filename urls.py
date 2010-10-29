@@ -12,8 +12,9 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     url(r'^issue/(?P<issue_id>\d+)/$', 'issues.views.issue_detail', name='issue-detail'),
-    url(r'^tag/(?P<tag>[\sa-zA-Z]+)/$', 'issues.views.tag', name='tag'),
-    url(r'^code/(?P<clause>[\s0-9a-zA-Z]+)/$', 'issues.views.complaint_code', name='clause'),
+    url(r'^tag/(?P<tag>[\sa-zA-Z]+)/$', 'issues.views.tag_detail', name='tag-detail'),
+    url(r'^clause/(?P<ident>[\s0-9a-zA-Z]+)/$', 'issues.views.clause_detail', name='clause-detail'),
+    url(r'^ent/(?P<entity_id>[\s0-9a-zA-Z]+)/$', 'issues.views.entity_detail', name='entity-detail'),
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
