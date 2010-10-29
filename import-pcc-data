@@ -188,7 +188,8 @@ def load_pcc_clauses():
 
     for d in pcc_clauses:
         code,created = ComplaintCode.objects.get_or_create( clause=d[0], prettyname=d[1] )
-        code.save()
+        if created:
+            code.save()
 
 
 def process( c ):
@@ -207,9 +208,9 @@ def process( c ):
     # Adjudication      text (if adjudicated)
     # Resolution        text (if resolved)
     # Publication       u'News of the World',
-    # Report            eg "78 Adjudication issued 18/11/08'
+    # Report            eg "78"
     # date_scraped      eg u'2010-10-27 13:23:08' 
-    # id                article_id from pcc db
+    # id                article_id from pcc db (decoded from base64 url)
     # url
     # Complainant_Name
     # Clauses_Noted
@@ -219,18 +220,14 @@ def process( c ):
 
     if c['Clauses_Noted'].strip().lower() == 'none':
         c['Clauses_Noted'] = u''
-    try:
-        if 'Date_Published' not in c:
-            c['Date_Published'] = c['Report']
-        date_published = extract_pubdate( c['Date_Published'] )
-        assert( date_published is not None )
-    except ValueError:
-        raise Exception( "Bad date: '%s' (%s)" % (c['Date_Published'], c['url']) )
+    date_published = dateutil.parser.parse( c['Date_Published'], dayfirst=True )
+    assert( date_published is not None )
 
 
     # create the PCC if it doesn't exist ;-)
     the_pcc, created = Entity.objects.get_or_create( name='PCC', kind='c' )
-    the_pcc.save()
+    if created:
+        the_pcc.save()
 
 
     outcome = None
@@ -252,10 +249,14 @@ def process( c ):
     issue.description = c['Complaint']
     issue.complaint_body = the_pcc
 
-    issue.title = u"%s vs %s" % (c['Complainant_Name'],c['Publication'] )
+    if 'Report' in c:
+        issue.report = c['Report']
+
+    issue.title = u"%s v %s" % (c['Complainant_Name'],c['Publication'] )
 
     issue.outcome, created = Outcome.objects.get_or_create( name=outcome )
-    issue.outcome.save()
+    if created:
+        issue.outcome.save()
 
     # clauses
     # check and store them for later adding (m2m)
@@ -274,7 +275,8 @@ def process( c ):
             raise Exception( "%s: Bad complaint_code '%s'" % ( c['url'], clause ) )
 
         code, created = ComplaintCode.objects.get_or_create( clause=clause )
-        code.save()
+        if created:
+            code.save()
         pcc_codes_objs.append( code )
 
 
@@ -282,13 +284,15 @@ def process( c ):
     complainant_objs = []
     complainant,created = Entity.objects.get_or_create( name=c['Complainant_Name'], kind='p' )
     complainant_objs.append( complainant )
-    complainant.save()
+    if created:
+        complainant.save()
 
     # who they are complaining about
     complaining_about_objs = []
     about,created = Entity.objects.get_or_create( name=c['Publication'], kind='m' )
     complaining_about_objs.append( about )
-    about.save()
+    if created:
+        about.save()
 
     # need to save it before we can add the m2m fields
     issue.save()

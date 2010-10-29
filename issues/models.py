@@ -1,5 +1,8 @@
 from django.db import models
 
+# TODO: add slug fields to things
+
+
 class Entity( models.Model ):
     """ eg Fred Bloggs, The Daily Mail, Ofcom """
     name = models.CharField( max_length=255 )
@@ -56,6 +59,9 @@ class Issue(models.Model):
 
     # eg article_id of the case as published in the PCC CMS system
     legacy_id = models.CharField( max_length=512 )
+
+    # for the PCC - the report number the case was published in
+    report = models.CharField( max_length=32, null=True )
 
     tags = models.ManyToManyField( Tag, blank=True )
     codes = models.ManyToManyField( ComplaintCode, blank=True  )
