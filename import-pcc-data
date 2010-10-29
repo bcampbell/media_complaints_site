@@ -10,8 +10,6 @@ import urllib2
 import json
 import pprint
 import dateutil.parser
-import MySQLdb
-import MySQLdb.cursors
 import re
 
 from django.core.management import setup_environ
@@ -25,8 +23,6 @@ from issues.models import *
 
 
 _conn = None
-
-
 
 
 def slurp_batch( offset, limit ):
@@ -158,6 +154,32 @@ def extract_pubdate( pubdate_str ):
     return dateutil.parser.parse( pubdate_str, dayfirst=True )  # fuzzy=True
 
 
+def load_pcc_clauses():
+    """ make sure all the PCC codes are in the system """
+    pcc_clauses = [
+        (1, u'Accuracy'),
+        (2, u'Opportunity to reply'),
+        (3, u'Privacy'),
+        (4, u'Harassment'),
+        (5, u'Intrusion into grief or shock'),
+        (6, u'Children'),
+        (7, u'Children in sex cases'),
+        (8, u'Hospitals'),
+        (9, u'Reporting of Crime'),
+        (10, u'Clandestine devices and subterfuge'),
+        (11, u'Victims of sexual assault'),
+        (12, u'Discrimination'),
+        (13, u'Financial journalism'),
+        (14, u'Confidential sources'),
+        (15, u'Witness payments in criminal trials'),
+        (16, u'Payment to criminals'),
+    ]
+
+    for d in pcc_clauses:
+        code,created = ComplaintCode.objects.get_or_create( clause=d[0], prettyname=d[1] )
+        code.save()
+
+
 def process( c ):
     if not 'url' in c:
         return
@@ -276,6 +298,8 @@ def process( c ):
 
 
 def main():
+    load_pcc_clauses()
+
     errcnt = 0
     offset = 0
     limit = 500
@@ -314,7 +338,6 @@ def main():
                     raise
 
         offset = offset + limit
-
 
 main()
 
