@@ -27,9 +27,18 @@ from issues.models import *
 _conn = None
 
 
+# cheesiness for local load
+f = open( "../pcc_scraper/output.json" )
+json_data = f.read()
+f.close()
+incoming_data = json.loads( json_data )
+
 
 
 def slurp_batch( offset, limit ):
+    return incoming_data[offset:offset+limit]
+
+def OLD_slurp_batch( offset, limit ):
 
     url = "http://api.scraperwiki.com/api/1.0/datastore/getdata"
 
