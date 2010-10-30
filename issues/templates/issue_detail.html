@@ -1,15 +1,35 @@
 {% extends "base.html" %}
 
-{% block title %}{{ issue.id }} - {{ issue.title }}{% endblock %}
+{% block title %}{{ issue.title }}{% endblock %}
 
 {% block content %}
-<h2>{{ issue.id }} - {{ issue.title }}</h2>
+
+<h2>
+{% for c in issue.complainants.all %}
+{% if forloop.first %}{% else %}/{% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
+{% endfor %}
+v
+{% for c in issue.complaining_about.all %}
+{% if forloop.first %}{% else %}/{% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
+{% endfor %}
+about
+{% for c in issue.clauses.all %}
+{% if forloop.first %}{% else %}/{% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
+{% endfor %}
+</h2>
+
+Date of Problem: {{ issue.date_of_problem|default:"unknown" }}<br/>
+Date of Decision: {{ issue.date_of_decision|default:"unknown" }}<br/>
+
 <table border=0>
 
 <td width="50%" valign="top">
         <h3>The complaint</h3>
         <em>{{issue.title}}</em>
         <p>{{issue.description|linebreaksbr}}</p>
+        {% if issue.url_of_complaint %}
+        (source: <a href="{{issue.url_of_complaint}}">{{issue.url_of_complaint}}<a/>)
+        {% endif %}
 
         <h3>Case outcome</h3>
         {% if issue.outcome %}
@@ -40,14 +60,14 @@
         <h3>Case summary<h3>
         <h4>Clause<h4>
         <ul>
-            {% for code in issue.codes.all %}
-            <li><a href="{{ code.get_absolute_url }}">{{code.clause}} - {{code.prettyname}}</a></li>
+            {% for clause in issue.clauses.all %}
+            <li><a href="{{ clause.get_absolute_url }}">{{clause}}</a></li>
             {% endfor %}
         </ul>
         <h4>Tags</h4>
         <ul>
             {% for tag in issue.tags.all %}
-            <li><a href="{{ tag.get_absolute_url }}">{{tag.name}}</a></li>
+            <li><a href="{{ tag.get_absolute_url }}">{{tag}}</a></li>
             {% endfor %}
         </ul>
 </td>

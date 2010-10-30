@@ -43,7 +43,7 @@ class Clause( models.Model ):
     # - explanation text (use markdown)
 
     def __unicode__(self):
-        return u"%s - %s" % (self.ident, self.prettyname)
+        return self.prettyname
 
     @models.permalink
     def get_absolute_url(self):
