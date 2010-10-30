@@ -6,29 +6,27 @@
 
 <h2>
 {% for c in issue.complainants.all %}
-{% if forloop.first %}{% else %}/{% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
+{% if forloop.first %}{% else %}/ {% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
 {% endfor %}
 v
 {% for c in issue.complaining_about.all %}
-{% if forloop.first %}{% else %}/{% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
+{% if forloop.first %}{% else %}/ {% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
 {% endfor %}
 about
 {% for c in issue.clauses.all %}
-{% if forloop.first %}{% else %}/{% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
+{% if forloop.first %}{% else %}, {% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
 {% endfor %}
 </h2>
 
-Date of Problem: {{ issue.date_of_problem|default:"unknown" }}<br/>
-Date of Decision: {{ issue.date_of_decision|default:"unknown" }}<br/>
+{{ issue.date_of_decision|default:"date unknown" }}<br/>
 
 <table border=0>
 
 <td width="50%" valign="top">
         <h3>The complaint</h3>
-        <em>{{issue.title}}</em>
         <p>{{issue.description|linebreaksbr}}</p>
         {% if issue.url_of_complaint %}
-        (source: <a href="{{issue.url_of_complaint}}">{{issue.url_of_complaint}}<a/>)
+        (source: <a href="{{issue.url_of_complaint}}">{{issue.url_of_complaint}}</a>)
         {% endif %}
 
         <h3>Case outcome</h3>

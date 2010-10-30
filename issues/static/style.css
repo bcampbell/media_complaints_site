@@ -1,0 +1,29 @@
+body {
+font-family: helvetica, arial, verdana, sans-serif;
+color: #444;
+}
+
+h1, h2, h3, h4, h5, h6 {
+font-weight: normal;
+color: #000;
+}
+
+h1 {
+font-size: 218%;
+}
+
+h2 {
+font-size: 164%;
+}
+
+h3 {
+font-size: 145%;
+}
+
+h4 {
+font-size: 118%;
+}
+
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
