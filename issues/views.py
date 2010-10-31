@@ -3,6 +3,23 @@ from django.http import HttpResponse,Http404
 from django.template import Context, loader
 from models import *
 from django.shortcuts import render_to_response
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
+
+
+
+def issue_list(request):
+    paginator = Paginator(Issue.objects.all(), 25)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except ValueError:
+        page = 1
+    try:
+        issues = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        issues = paginator.page(paginator.num_pages)
+
+    return render_to_response('issue_list.html', {"issues": issues})
+
 
 def issue_detail(request, issue_id):
     try:
