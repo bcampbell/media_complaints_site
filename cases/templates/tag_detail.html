@@ -7,8 +7,8 @@
 
 <p>cases marked <em>{{ tag.name }}</em>:</p>
 <ul>
-    {% for issue in tag.issue_set.all %}
-    <li><a href="{{ issue.get_absolute_url }}">{{issue.title}}</a></li>
+    {% for case in tag.case_set.all %}
+    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
     {% endfor %}
 </ul>
 

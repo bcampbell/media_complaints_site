@@ -1,40 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}{{ issue.title }}{% endblock %}
+{% block title %}{{ case.title }}{% endblock %}
 
 {% block content %}
 
 <h2>
-{% for c in issue.complainants.all %}
+{% for c in case.complainants.all %}
 {% if forloop.first %}{% else %}/ {% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
 {% endfor %}
 v
-{% for c in issue.complaining_about.all %}
-{% if forloop.first %}{% else %}/ {% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
+{% for def in case.defendants.all %}
+{% if forloop.first %}{% else %}/ {% endif %}<a href="{{def.get_absolute_url}}">{{def}}</a>
 {% endfor %}
 about
-{% for c in issue.clauses.all %}
+{% for c in case.clauses.all %}
 {% if forloop.first %}{% else %}, {% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
 {% endfor %}
 </h2>
 
-{{ issue.date_of_decision|default:"date unknown" }}<br/>
+{{ case.date_of_decision|default:"date unknown" }}<br/>
 
 <table border=0>
 
 <td width="50%" valign="top">
         <h3>The complaint</h3>
-        <p>{{issue.description|linebreaksbr}}</p>
-        {% if issue.url_of_complaint %}
-        (source: <a href="{{issue.url_of_complaint}}">{{issue.url_of_complaint}}</a>)
+        <p>{{case.complaint|linebreaksbr}}</p>
+        {% if case.url_of_complaint %}
+        (source: <a href="{{case.url_of_complaint}}">{{case.url_of_complaint}}</a>)
         {% endif %}
 
         <h3>Case outcome</h3>
-        {% if issue.outcome %}
-        <p>{{issue.outcome.name}}</p>
+        {% if case.outcome %}
+        <p>{{case.outcome.name}}</p>
         {% endif %}
 
-        {% for detail in issue.detail_set.all %}
+        {% for detail in case.detail_set.all %}
         <h3>{{detail.kind|title}}</h3>
         <p>{{detail.content|linebreaksbr}}</p>
         {% endfor %}
@@ -44,27 +44,37 @@ about
 <td width="25%" valign="top">
         <h3>Similar cases</h3>
         <ul>
-            {% for related in issue.related.all %}
+            {% for related in case.related_cases.all %}
             <li><a href="{{ related.get_absolute_url }}">{{related.title}}</a></li>
             {% endfor %}
         </ul>
 
-        <h3>Articles about this</h3>
+        <h3>Offending Articles</h3>
+        <ul>
+            {% for art in case.offending_articles.all %}
+            <li><a href="{{ art.url }}">{{art.url}}</a></li>
+            {% endfor %}
+        </ul>
         
         <h3>View more</h3>
+        <ul>
+            {% for art in case.related_links.all %}
+            <li><a href="{{ art.url }}">{{art.url}}</a></li>
+            {% endfor %}
+        </ul>
 </td>
 
 <td width="25%" valign="top" style="border: 1px solid black;">
         <h3>Case summary<h3>
         <h4>Clause<h4>
         <ul>
-            {% for clause in issue.clauses.all %}
+            {% for clause in case.clauses.all %}
             <li><a href="{{ clause.get_absolute_url }}">{{clause}}</a></li>
             {% endfor %}
         </ul>
         <h4>Tags</h4>
         <ul>
-            {% for tag in issue.tags.all %}
+            {% for tag in case.tags.all %}
             <li><a href="{{ tag.get_absolute_url }}">{{tag}}</a></li>
             {% endfor %}
         </ul>

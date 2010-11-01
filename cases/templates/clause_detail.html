@@ -7,8 +7,8 @@
 
 Filed against this clause:<br/>
 <ul>
-    {% for issue in clause.issue_set.all %}
-    <li><a href="{{ issue.get_absolute_url }}">{{issue.title}}</a></li>
+    {% for case in clause.case_set.all %}
+    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
     {% endfor %}
 </ul>
 

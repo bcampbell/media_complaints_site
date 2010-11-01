@@ -7,26 +7,26 @@ from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
 
 
-def issue_list(request):
-    paginator = Paginator(Issue.objects.all(), 25)
+def case_list(request):
+    paginator = Paginator(Case.objects.all(), 25)
     try:
         page = int(request.GET.get('page', '1'))
     except ValueError:
         page = 1
     try:
-        issues = paginator.page(page)
+        cases = paginator.page(page)
     except (EmptyPage, InvalidPage):
-        issues = paginator.page(paginator.num_pages)
+        cases = paginator.page(paginator.num_pages)
 
-    return render_to_response('issue_list.html', {"issues": issues})
+    return render_to_response('case_list.html', {"cases": cases})
 
 
-def issue_detail(request, issue_id):
+def case_detail(request, case_id):
     try:
-        obj = Issue.objects.get(pk=issue_id)
-    except Issue.DoesNotExist:
+        obj = Case.objects.get(pk=case_id)
+    except Case.DoesNotExist:
         raise Http404
-    return render_to_response('issue_detail.html', {'issue': obj})
+    return render_to_response('case_detail.html', {'case': obj})
 
 
 def entity_detail(request, entity_id):
