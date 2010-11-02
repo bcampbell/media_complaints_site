@@ -21,11 +21,14 @@ class CaseAdmin(admin.ModelAdmin):
     inlines = [DetailInline,]
     filter_horizontal = ['offending_articles','related_cases','related_links','complainants','defendants','clauses']
 
+class ArticleAdmin(admin.ModelAdmin):
+    filter_horizontal = ['authors',]
+
 admin.site.register(Entity)
 admin.site.register(Case,CaseAdmin)
 admin.site.register(Tag)
 admin.site.register(Clause)
 #admin.site.register(Detail)
 admin.site.register(Outcome)
-admin.site.register(Article)
+admin.site.register(Article,ArticleAdmin)
 

@@ -7,14 +7,14 @@
 
 <h3>Complaints against {{ ent.name }}</h3>
 <ul>
-    {% for case in ent.case_abouts.all %}
+    {% for case in ent.cases_as_defendant.all %}
     <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
     {% endfor %}
 </ul>
 
 <h3>Complaints made by {{ ent.name }}</h3>
 <ul>
-    {% for case in ent.case_complainants.all %}
+    {% for case in ent.cases_as_complainant.all %}
     <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
     {% endfor %}
 </ul>

@@ -65,7 +65,7 @@ class Article( models.Model ):
     url = models.URLField(max_length=512, verify_exists=False, blank=True)
     headline = models.CharField( max_length=256, blank=True )
     pubdate = models.DateField(blank=True,null=True)
-    publication = models.ForeignKey( Entity, related_name="articles_published", limit_choices_to={'kind':'c'}, null=True, blank=True )
+    publication = models.ForeignKey( Entity, related_name="articles_published", limit_choices_to={'kind':'m'}, null=True, blank=True )
     authors = models.ManyToManyField( Entity, related_name="articles_authored", limit_choices_to={'kind':'p'}, blank=True )
 
     def __unicode__(self):
