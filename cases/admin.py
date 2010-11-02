@@ -19,6 +19,7 @@ class CaseAdmin(admin.ModelAdmin):
     search_fields = ['title','description','summary']
     raw_id_fields = ('related_cases', )
     inlines = [DetailInline,]
+    filter_horizontal = ['offending_articles','related_cases','related_links','complainants','defendants','clauses']
 
 admin.site.register(Entity)
 admin.site.register(Case,CaseAdmin)

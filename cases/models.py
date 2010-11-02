@@ -69,10 +69,8 @@ class Article( models.Model ):
     authors = models.ManyToManyField( Entity, related_name="articles_authored", limit_choices_to={'kind':'p'}, blank=True )
 
     def __unicode__(self):
-        if self.url:
-            return self.url
-        else:
-            return self.headline
+        return u'%s ( %s )' % (self.headline, self.url)
+
 
 class Case(models.Model):
     """ an case reported to a body (eg someone complaining to the PCC) """
