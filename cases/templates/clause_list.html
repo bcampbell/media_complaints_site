@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Clauses{% endblock %}
+
+{% block content %}
+<h2>Clauses</h2>
+
+
+{% load pagination_tags %}
+{% autopaginate clause_list 50 %}
+
+{% paginate %}
+<ul>
+{% for clause in clause_list %}
+<li><a href="{{ clause.get_absolute_url }}">{{clause.prettyname}}</a></li>
+{% endfor %}
+</ul>
+{% paginate %}
+
+
+{% endblock %}
