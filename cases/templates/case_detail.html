@@ -18,43 +18,55 @@ about
 {% endfor %}
 </h2>
 
-{{ case.date_of_decision|default:"date unknown" }}<br/>
+<p><em>{{ case.date_of_decision|default:"date unknown" }}<br/>{{case.summary}}</em></p>
 
 <table border=0>
 
 <td width="50%" valign="top">
-        <h3>The complaint</h3>
+    <h3>The complaint</h3>
         <p>{{case.complaint|linebreaksbr}}</p>
         {% if case.url_of_complaint %}
-        (source: <a href="{{case.url_of_complaint}}">{{case.url_of_complaint}}</a>)
+        <p>(source: <a href="{{case.url_of_complaint}}">{{case.url_of_complaint}}</a>)</p>
+        {% endif %}
+        
+        {% if case.offending_articles.all %}
+        <h4>Offending Articles</h4>
+        <ul>
+            {% for art in case.offending_articles.all %}
+            <li><a href="{{ art.url }}">{{art.url}}</a></li>
+            {% endfor %}
+        </ul>
         {% endif %}
 
-        <h3>Case outcome</h3>
-        {% if case.outcome %}
-        <p>{{case.outcome.name}}</p>
-        {% endif %}
-
+        <h3>Case outcome - {{case.outcome.name}}</h3>
         {% for detail in case.detail_set.all %}
-        <h3>{{detail.kind|title}}</h3>
+        <h4>{{detail.kind|title}}</h4>
         <p>{{detail.content|linebreaksbr}}</p>
         {% endfor %}
 
 </td>
 
 <td width="25%" valign="top">
-        <h3>Similar cases</h3>
+    <h3>Similar cases</h3>
+    {% if case.related_cases.all %}
         <ul>
             {% for related in case.related_cases.all %}
             <li><a href="{{ related.get_absolute_url }}">{{related.title}}</a></li>
             {% endfor %}
         </ul>
-
-        <h3>Offending Articles</h3>
+    {% endif %}
         <ul>
-            {% for art in case.offending_articles.all %}
-            <li><a href="{{ art.url }}">{{art.url}}</a></li>
-            {% endfor %}
-        </ul>
+{% for c in case.complainants.all %}
+<li>Cases brought by <a href="{{c.get_absolute_url}}">{{c}}</a></li>
+{% endfor %}
+{% for def in case.defendants.all %}
+<li>Cases against <a href="{{def.get_absolute_url}}">{{def}}</a></li>
+{% endfor %}
+{% for c in case.clauses.all %}
+<li>Cases about <a href="{{c.get_absolute_url}}">{{c}}</a></li>
+{% endfor %}
+</ul>
+
         
         <h3>View more</h3>
         <ul>
@@ -82,4 +94,8 @@ about
 </tr>
 </table>
 
+{% if user.is_authenticated %}
+<a href="{% url admin:cases_case_change case.pk %}">edit</a>
+{% endif %}
 {% endblock %}
+

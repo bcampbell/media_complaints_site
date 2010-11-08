@@ -1,14 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
 <head>
-    <title>{% block title %}MediaMoaner{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css" />
-</head>
-<body>
-    <div class="header">
+    <title>{% block title %}Media Complaints Site{% endblock %}</title>
 
+<link href="/static/boilerplate.css" type="text/css" rel="stylesheet">
+<link href="/static/style.css" type="text/css" rel="stylesheet">
+</head>
+<body class="{% block page_class %}{% endblock %}">
+    <div id="header">
+        <h1>Media Complaints Site</h1>
+        <div class="nav">
+            View complaints by: <a href="{% url case-list %}">Case</a>
+            <a href="{% url defendant-list %}">Publication</a>
+            <a href="{% url complainant-list %}">Complainant</a>
+            <a href="{% url clause-list %}">Issue</a>
+        </div>
     </div>
+    <div id="content">
     {% block content %}{% endblock %}
+    </div>
+    <div id="footer">
+        &copy; 2010, MST
+    </div>
 </body>
 </html>
 

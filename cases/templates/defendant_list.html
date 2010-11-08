@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Defendants{% endblock %}
+
+{% block content %}
+<h2>Defendants</h2>
+
+{% load pagination_tags %}
+{% autopaginate defendant_list 50 %}
+
+{% paginate %}
+<ul>
+{% for ent in defendant_list %}
+<li><a href="{{ ent.get_absolute_url }}">{{ent}}</a></li>
+{% endfor %}
+</ul>
+{% paginate %}
+
+
+{% endblock %}

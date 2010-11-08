@@ -18,7 +18,11 @@ class Entity( models.Model ):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('entity-detail', (), { 'entity_id': self.id })
+        return ('entity-detail', (), { 'object_id': self.id })
+
+    class Meta:
+        ordering = ('name', )
+
 
 
 class Tag( models.Model ):
@@ -28,7 +32,11 @@ class Tag( models.Model ):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('tag-detail', (), { 'tag': self.name })
+        return ('tag-detail', (), { 'object_id': self.name })
+
+    class Meta:
+        ordering = ('name', )
+
 
 
 class Clause( models.Model ):
@@ -47,7 +55,11 @@ class Clause( models.Model ):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('clause-detail', (), { 'clause_id': self.id })
+        return ('clause-detail', (), { 'object_id': self.id })
+
+    class Meta:
+        ordering = ('ident', )
+
 
 
 class Outcome( models.Model ):
@@ -70,6 +82,10 @@ class Article( models.Model ):
 
     def __unicode__(self):
         return u'%s ( %s )' % (self.headline, self.url)
+
+    class Meta:
+        ordering = ('pubdate', )
+
 
 
 class Case(models.Model):
@@ -126,8 +142,10 @@ class Case(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('case-detail', (), { 'case_id': self.id })
+        return ('case-detail', (), { 'object_id': self.id })
 
+    class Meta:
+        ordering = ('-date_of_decision', )
 
 
 class Detail( models.Model ):

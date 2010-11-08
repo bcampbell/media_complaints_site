@@ -1,2 +1,3 @@
 Django
 python-dateutil
+django-pagination

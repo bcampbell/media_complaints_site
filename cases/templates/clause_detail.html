@@ -5,10 +5,17 @@
 {% block content %}
 <h2>{{ clause.ident}} - {{clause.prettyname}}</h2>
 
-Filed against this clause:<br/>
+<em>
+    <p>
+    Description and background information about this clause goes here, along with links to code of practice.
+    </p>
+</em>
+
+
+<p>{{ clause.case_set.all.count }} complaints about <strong>{{clause.prettyname}}</strong>:</p>
 <ul>
     {% for case in clause.case_set.all %}
-    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
+    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
     {% endfor %}
 </ul>
 

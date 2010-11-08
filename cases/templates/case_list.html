@@ -1,34 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}Issues{% endblock %}
+{% block title %}Cases{% endblock %}
 
 {% block content %}
-<h2>Issues</h2>
+<h2>Cases</h2>
 
 
-{{ cases.paginator.count }} cases:
+{% load pagination_tags %}
+{% autopaginate case_list 50 %}
+
+{% paginate %}
 <ul>
-{% for case in cases.object_list %}
+{% for case in case_list %}
 <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
 {% endfor %}
 </ul>
-
-<div class="pagination">
-    <span class="step-links">
-        {% if cases.has_previous %}
-            <a href="?page={{ cases.previous_page_number }}">previous</a>
-        {% endif %}
-
-        <span class="current">
-            Page {{ cases.number }} of {{ cases.paginator.num_pages }}.
-        </span>
-
-        {% if cases.has_next %}
-            <a href="?page={{ cases.next_page_number }}">next</a>
-        {% endif %}
-    </span>
-</div>
-
+{% paginate %}
 
 
 {% endblock %}

@@ -1,40 +1,22 @@
 # Create your views here.
 from django.http import HttpResponse,Http404
 from django.template import Context, loader
+from django.template import RequestContext
+
 from models import *
 from django.shortcuts import render_to_response
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 
+from django.db.models import Count
 
-
-def case_list(request):
-    paginator = Paginator(Case.objects.all(), 25)
+def entity_detail(request, object_id):
     try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
-    try:
-        cases = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        cases = paginator.page(paginator.num_pages)
-
-    return render_to_response('case_list.html', {"cases": cases})
-
-
-def case_detail(request, case_id):
-    try:
-        obj = Case.objects.get(pk=case_id)
-    except Case.DoesNotExist:
-        raise Http404
-    return render_to_response('case_detail.html', {'case': obj})
-
-
-def entity_detail(request, entity_id):
-    try:
-        obj = Entity.objects.get(pk=entity_id)
+        obj = Entity.objects.get(pk=object_id)
     except Entity.DoesNotExist:
         raise Http404
-    return render_to_response('entity_detail.html', {'ent': obj})
+
+    clause_stats = Clause.objects.filter( case__defendants__in=(obj,) ).distinct().annotate( num_cases=Count( 'case' ) )
+    return render_to_response('entity_detail.html', {'ent': obj,'clause_stats': clause_stats })
 
 
 def tag_detail(request, tag):

@@ -1,23 +1,37 @@
 {% extends "base.html" %}
 
 {% block title %}{{ ent.name }}{% endblock %}
+{% block page_class %}wibble flibble poo{% endblock %}
 
 {% block content %}
 <h2>{{ ent.name }}</h2>
 
-<h3>Complaints against {{ ent.name }}</h3>
+{% if ent.cases_as_defendant.all %}
+<h3>{{ent.cases_as_defendant.all.count}} complaints against {{ ent.name }}</h3>
 <ul>
     {% for case in ent.cases_as_defendant.all %}
     <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
     {% endfor %}
 </ul>
+{% endif %}
 
+{% if ent.cases_as_complainant.all %}
 <h3>Complaints made by {{ ent.name }}</h3>
 <ul>
     {% for case in ent.cases_as_complainant.all %}
     <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
     {% endfor %}
 </ul>
+{% endif %}
+
+{% if clause_stats %}
+<h3>Complaints by issue</h3>
+<table>
+{% for c in clause_stats %}
+  <tr><td>{{c}}</td><td>{{c.num_cases}}</td></tr>
+{% endfor %}
+</table>
+{% endif %}
 
 
 

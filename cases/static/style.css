@@ -1,29 +1,60 @@
-body {
-font-family: helvetica, arial, verdana, sans-serif;
-color: #444;
-}
+/* builds upon boilerplate.css, which provides reset and basic typography */
 
-h1, h2, h3, h4, h5, h6 {
-font-weight: normal;
-color: #000;
-}
 
-h1 {
-font-size: 218%;
-}
+/*
+ * GENERIC SITE-WIDE STUFF
+ */
 
-h2 {
-font-size: 164%;
-}
-
-h3 {
-font-size: 145%;
-}
-
-h4 {
-font-size: 118%;
+.disabled {
+  color: #888;
 }
 
 
-a { text-decoration: none; }
-a:hover { text-decoration: underline; }
+/*
+ * LAYOUT
+ */
+
+#header {
+  display: block;
+  width: 100%;
+  padding: 0.1em 5% 0.1em 5%;
+  margin: 0px;
+  border-bottom: 1px solid black;
+}
+
+
+#content {
+  padding: 2em 5% 0px 5%;
+  margin: 0px;
+}
+
+#footer {
+  display: block;
+  background-color: #888;
+  color: #fff;
+}
+
+
+/*
+ *  SPECIFIC ELEMENTS/WIDGETS
+ */
+
+.pagination {
+  margin: 0.2em;
+  padding: 0.2em;
+  border: 1px solid black;
+}
+
+.pagination .current { font-weight: bold; }
+
+.nav { padding: 0 10px; }
+.nav a { padding: 5px 10px; color: #666; text-decoration: none; }
+.nav a:hover { background: #ccc; color: #333; }
+
+.nav ul { margin: 0; padding: 0; display: inline; }
+.nav ul li { float: left; list-style: none; margin: 0; padding: 0; }
+.nav ul li a { float: left; display: block; }
+
+/* Clearing floats without extra markup  */
+.nav ul:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+
