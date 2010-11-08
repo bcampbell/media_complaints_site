@@ -1,16 +1,72 @@
 {% extends "base.html" %}
 
 {% block title %}{{ ent.name }}{% endblock %}
+
+{% block head_extra %}
+{% if clause_stats %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("jquery", "1.4.3");
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback( function() {
+    el = document.getElementById( 'clause_stats' );
+    data = tableToData( el );
+    var chart = new google.visualization.PieChart( el );
+    chart.draw(data, {width: 500, height: 400, title: $('h3', el).text() });
+  });
+
+  function tableToData( table ) {
+    var data = new google.visualization.DataTable();
+
+//    $('thead th', table).each(function(column) {
+      //alert( column + $(this).text() );
+//    } );
+
+    data.addColumn('string', 'Clause');
+    data.addColumn('number', 'Number of complaints');
+
+    data.addRows( $('tbody tr').size() );
+    $('tbody tr', table).each(function(row) {
+      $('td', this).each(function(col) {
+        v=$(this).text(); 
+        if( col ==1 ) {
+          v= parseInt(v);
+        }
+        data.setValue( row,col,v );
+      });
+    });
+    return data;
+  }
+
+</script>
+{% endif %}
+{% endblock %}
+
 {% block page_class %}wibble flibble poo{% endblock %}
 
 {% block content %}
 <h2>{{ ent.name }}</h2>
 
+{% if clause_stats %}
+<div id="clause_stats">
+<h3>Complaints by issue</h3>
+<table>
+  <thead><tr><th>Clause</th><th>Number of complaints</th></tr></thead>
+  <tbody>
+{% for c in clause_stats %}
+  <tr><td>{{c}}</td><td>{{c.num_cases}}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+
+
 {% if ent.cases_as_defendant.all %}
 <h3>{{ent.cases_as_defendant.all.count}} complaints against {{ ent.name }}</h3>
 <ul>
     {% for case in ent.cases_as_defendant.all %}
-    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
+    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
     {% endfor %}
 </ul>
 {% endif %}
@@ -19,18 +75,9 @@
 <h3>Complaints made by {{ ent.name }}</h3>
 <ul>
     {% for case in ent.cases_as_complainant.all %}
-    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a></li>
+    <li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
     {% endfor %}
 </ul>
-{% endif %}
-
-{% if clause_stats %}
-<h3>Complaints by issue</h3>
-<table>
-{% for c in clause_stats %}
-  <tr><td>{{c}}</td><td>{{c.num_cases}}</td></tr>
-{% endfor %}
-</table>
 {% endif %}
 
 

@@ -29,6 +29,7 @@
 }
 
 #footer {
+  clear: both;
   display: block;
   background-color: #888;
   color: #fff;
@@ -58,3 +59,9 @@
 /* Clearing floats without extra markup  */
 .nav ul:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
 
+
+#clause_stats {
+    float: right;
+    padding: 0px;
+    margin: 0px;
+}

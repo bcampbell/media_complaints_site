@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
-from django.views.generic import list_detail
+from django.views.generic import list_detail,simple
 
 from media_complaints_site.cases.models import *
 
@@ -19,6 +19,10 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
 #    url(r'^$', 'cases.views.case_list', name='case-list'),
+    url( r'^$', simple.direct_to_template,
+            dict( template="home.html", ),
+            name='home',
+            ),
 
     # cases
     url( r'^cases$', list_detail.object_list,

@@ -5,6 +5,8 @@
 
 <link href="/static/boilerplate.css" type="text/css" rel="stylesheet">
 <link href="/static/style.css" type="text/css" rel="stylesheet">
+{% block head_extra %}
+{% endblock %}
 </head>
 <body class="{% block page_class %}{% endblock %}">
     <div id="header">
@@ -14,6 +16,7 @@
             <a href="{% url defendant-list %}">Publication</a>
             <a href="{% url complainant-list %}">Complainant</a>
             <a href="{% url clause-list %}">Issue</a>
+            <a href="{% url tag-list %}">Tags</a>
         </div>
     </div>
     <div id="content">
