@@ -34,3 +34,22 @@ def clause_detail(request, clause_id ):
         raise Http404
     return render_to_response('clause_detail.html', {'clause': obj})
 
+
+
+from helpers import get_query
+
+def search(request):
+    query_string = ''
+    found = None
+    if ('q' in request.GET) and request.GET['q'].strip():
+        query_string = request.GET['q']
+        
+        entry_query = get_query(query_string, ['title', 'summary', 'complaint', 'defendants__name', 'complainants__name', 'detail__content'])
+
+        found = Case.objects.filter(entry_query)    #.order_by('-date_of_decision')
+
+    return render_to_response('search.html',
+                          { 'query_string': query_string, 'case_list': found },
+                          context_instance=RequestContext(request))
+
+

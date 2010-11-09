@@ -18,6 +18,14 @@
             <a href="{% url clause-list %}">Issue</a>
             <a href="{% url tag-list %}">Tags</a>
         </div>
+
+        <div class="searchbox">
+        <form action="/search" method="get">
+        Quick search: <input type="text" name="q">
+        <input type="submit" value="Search">
+    </form>
+    </div>
+
     </div>
     <div id="content">
     {% block content %}{% endblock %}

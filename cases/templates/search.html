@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<h2>Search</h2>
+<pre>{{query_string}}</pre>
+
+{% load pagination_tags %}
+{% autopaginate case_list 50 %}
+
+{% paginate %}
+<ul>
+{% for case in case_list %}
+<li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
+{% endfor %}
+</ul>
+{% paginate %}
+
+
+{% endblock %}

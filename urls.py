@@ -96,6 +96,7 @@ urlpatterns = patterns('',
             template_name='article_list.html',
             template_object_name="article"
             ), ),
+    url(r'^search$', 'cases.views.search', name='search'),
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
