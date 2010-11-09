@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block page_id %}front_page{% endblock %}
+{% block title %}Media Complaints Site{% endblock %}
+
+{% block content %}
+<em>
+<p>
+Home page.
+</p>
+<p>
+There should probably be stuff here. Interesting stuff.
+</p>
+</em>
+
+<div class="top_list">
+<h3>Top defendants</h3>
+<ul>
+{% for ent in top_defendants %}
+<li><a href="{{ ent.get_absolute_url }}">{{ent}}</a> <span class="case-count">{{ent.num_cases}} complaints</span></li>
+{% endfor %}
+</ul>
+<a href="{% url defendant-list %}">All defendants</a>
+</div>
+
+<div class="top_list">
+<h3>Top complainants</h3>
+<ul>
+{% for ent in top_complainants %}
+<li><a href="{{ ent.get_absolute_url }}">{{ent}}</a> <span class="case-count">{{ent.num_cases}} complaints</span></li>
+{% endfor %}
+</ul>
+<a href="{% url complainant-list %}">All complainants</a>
+</div>
+
+<div class="top_list">
+<h3>Top tags</h3>
+<ul>
+{% for tag in top_tags %}
+<li><a href="{{ tag.get_absolute_url }}">{{tag.name}}</a> <span class="case-count">{{tag.num_cases}} complaints</span></li>
+{% endfor %}
+</ul>
+<a href="{% url tag-list %}">All tags</a>
+</div>
+
+{% endblock %}

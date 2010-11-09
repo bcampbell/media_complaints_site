@@ -8,9 +8,9 @@
 {% block head_extra %}
 {% endblock %}
 </head>
-<body class="{% block page_class %}{% endblock %}">
+<body id="{% block page_id %}{% endblock %}" class="{% block page_class %}{% endblock %}">
     <div id="header">
-        <h1>Media Complaints Site</h1>
+        <h1><a href="{% url front-page %}">Media Complaints Site</a></h1>
         <div class="nav">
             View complaints by: <a href="{% url case-list %}">Case</a>
             <a href="{% url defendant-list %}">Publication</a>

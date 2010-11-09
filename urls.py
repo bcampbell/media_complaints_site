@@ -19,10 +19,7 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
 #    url(r'^$', 'cases.views.case_list', name='case-list'),
-    url( r'^$', simple.direct_to_template,
-            dict( template="home.html", ),
-            name='home',
-            ),
+    url( r'^$', 'cases.views.front_page', name='front-page', ),
 
     # cases
     url( r'^cases$', list_detail.object_list,

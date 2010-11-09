@@ -53,3 +53,12 @@ def search(request):
                           context_instance=RequestContext(request))
 
 
+def front_page(request):
+    context = {}
+    context['top_defendants'] = Entity.objects.all().annotate( num_cases=Count('cases_as_defendant') ).order_by('-num_cases')[:10]
+    context['top_complainants'] = Entity.objects.all().annotate( num_cases=Count('cases_as_complainant') ).order_by('-num_cases')[:10]
+    context['top_tags'] = Tag.objects.all().annotate( num_cases=Count('case') ).order_by('-num_cases')[:10]
+
+
+    return render_to_response('front_page.html', context)
+
