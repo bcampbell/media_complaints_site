@@ -75,16 +75,22 @@
   margin-top: 2em;
 }
 
-
-#front_page .top_list {
-    float: left;
+.box {
     border: 1px solid #ccc;
     margin: 1em;
     padding: 0.5em;
     -moz-border-radius: 0.5em;
+}
+
+#front_page .top_list {
+    float: left;
     width: 25%;
 }
 
+#front_page .notable-complaints {
+    clear: both;
+    width: 90%;
+}
 
 /*
  *  SPECIFIC ELEMENTS/WIDGETS

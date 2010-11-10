@@ -6,7 +6,7 @@
 
 
 
-<div class="top_list">
+<div class="box top_list">
 <h3>Issues</h3>
 <ul>
 {% for issue in top_issues %}
@@ -15,7 +15,7 @@
 </ul>
 </div>
 
-<div class="top_list">
+<div class="box top_list">
 <h3>Top defendants</h3>
 <ul>
 {% for ent in top_defendants %}
@@ -25,7 +25,7 @@
 <a href="{% url defendant-list %}">All defendants</a>
 </div>
 
-<div class="top_list">
+<div class="box top_list">
 <h3>Top tags</h3>
 <ul>
 {% for tag in top_tags %}
@@ -34,6 +34,25 @@
 </ul>
 <a href="{% url tag-list %}">All tags</a>
 </div>
+
+<div class="box notable-complaints">
+
+    <h3>Example model complaints:</h3>
+    <p>
+These are some of the most high profile cases the PCC has dealt with in recent years. We have gone through
+them to add as much contextual information as possible.
+</p>
+<ul>
+{% for case in notable_case_list %}
+<li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
+{% endfor %}
+</ul>
+    <p>
+    We will be marking up other cases in the database throughout the year. If you have suggestions for what we
+should include, please get in touch
+</p>
+</div>
+
 
 
 
