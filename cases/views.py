@@ -58,6 +58,7 @@ def front_page(request):
     context['top_defendants'] = Entity.objects.all().annotate( num_cases=Count('cases_as_defendant') ).order_by('-num_cases')[:10]
     context['top_complainants'] = Entity.objects.all().annotate( num_cases=Count('cases_as_complainant') ).order_by('-num_cases')[:10]
     context['top_tags'] = Tag.objects.all().annotate( num_cases=Count('case') ).order_by('-num_cases')[:10]
+    context['top_issues'] = Clause.objects.all().annotate( num_cases=Count('case') ).order_by('-num_cases')
 
 
     return render_to_response('front_page.html', context)

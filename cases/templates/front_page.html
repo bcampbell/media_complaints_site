@@ -3,14 +3,17 @@
 {% block title %}Media Complaints Site{% endblock %}
 
 {% block content %}
-<em>
-<p>
-Home page.
-</p>
-<p>
-There should probably be stuff here. Interesting stuff.
-</p>
-</em>
+
+
+
+<div class="top_list">
+<h3>Issues</h3>
+<ul>
+{% for issue in top_issues %}
+<li><a href="{{ issue.get_absolute_url }}">{{issue}}</a> <span class="case-count">{{issue.num_cases}} complaints</span></li>
+{% endfor %}
+</ul>
+</div>
 
 <div class="top_list">
 <h3>Top defendants</h3>
@@ -23,16 +26,6 @@ There should probably be stuff here. Interesting stuff.
 </div>
 
 <div class="top_list">
-<h3>Top complainants</h3>
-<ul>
-{% for ent in top_complainants %}
-<li><a href="{{ ent.get_absolute_url }}">{{ent}}</a> <span class="case-count">{{ent.num_cases}} complaints</span></li>
-{% endfor %}
-</ul>
-<a href="{% url complainant-list %}">All complainants</a>
-</div>
-
-<div class="top_list">
 <h3>Top tags</h3>
 <ul>
 {% for tag in top_tags %}
@@ -41,5 +34,7 @@ There should probably be stuff here. Interesting stuff.
 </ul>
 <a href="{% url tag-list %}">All tags</a>
 </div>
+
+
 
 {% endblock %}

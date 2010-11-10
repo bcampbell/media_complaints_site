@@ -10,7 +10,14 @@
 </head>
 <body id="{% block page_id %}{% endblock %}" class="{% block page_class %}{% endblock %}">
     <div id="header">
-        <h1><a href="{% url front-page %}">Media Complaints Site</a></h1>
+        <div class="banner">
+        <h1><a href="{% url front-page %}">Press complaints (the unofficial site)</a></h1>
+        <div class="logo">
+            <a href="http://mediastandardstrust.org"><img src="/static/mst_logo.png" alt="MST logo"/></a>
+        </div>
+    <div class="explain">
+            All recorded complaints made to the PCC since 1996 put into a re-usable fashion so you - the public - can use them <sup><a href="#data_sources">*</a></sup>
+    </div>
         <div class="nav">
             View complaints by: <a href="{% url case-list %}">Case</a>
             <a href="{% url defendant-list %}">Publication</a>
@@ -23,7 +30,9 @@
         <form action="/search" method="get">
         Quick search: <input type="text" name="q">
         <input type="submit" value="Search">
-    </form>
+        </form>
+        </div>
+
     </div>
 
     </div>
@@ -31,7 +40,11 @@
     {% block content %}{% endblock %}
     </div>
     <div id="footer">
-        &copy; 2010, MST
+        <div id="data_sources">
+            * Complaints taken and repurposed from www.pcc.org.uk with further data added by MST</div>
+        <div class="copyright">
+            &copy; Media Standards Trust 2010
+        </div>
     </div>
 </body>
 </html>

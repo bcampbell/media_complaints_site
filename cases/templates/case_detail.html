@@ -33,7 +33,11 @@ about
         <h4>Offending Articles</h4>
         <ul>
             {% for art in case.offending_articles.all %}
-            <li><a href="{{ art.url }}">{{art.url}}</a></li>
+            <li>
+            <a href="{{ art.url }}">{{art.headline|default:art.url}}</a>
+            {% if art.publication %}<span class="publication">{{art.publication.name}}</span>{%endif%}
+            {% if art.pubdate %}<span class="pubdate">{{art.pubdate}}</span>{%endif%}
+            </li>
             {% endfor %}
         </ul>
         {% endif %}
@@ -67,11 +71,15 @@ about
 {% endfor %}
 </ul>
 
-        
+
         <h3>View more</h3>
         <ul>
             {% for art in case.related_links.all %}
-            <li><a href="{{ art.url }}">{{art.url}}</a></li>
+            <li>
+            <a href="{{ art.url }}">{{art.headline|default:art.url}}</a>
+            {% if art.publication %}<span class="publication">{{art.publication.name}}</span>{%endif%}
+            {% if art.pubdate %}<span class="pubdate">{{art.pubdate}}</span>{%endif%}
+            </li>
             {% endfor %}
         </ul>
 </td>

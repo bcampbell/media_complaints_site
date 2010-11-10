@@ -20,6 +20,18 @@
   font-style: italic;
 }
 
+.publication {
+  color: #888;
+  font-size: small;
+  font-style: italic;
+}
+
+.pubdate {
+  color: #888;
+  font-size: small;
+  font-style: italic;
+}
+
 
 /*
  * LAYOUT
@@ -27,18 +39,28 @@
 
 #header {
   display: block;
-  width: 100%;
-  padding: 0.1em 5% 0.1em 5%;
-  margin: 0px;
+  width: 90%;
+  padding: 0.1em 5% 0em 5%;
   border-bottom: 1px solid black;
+}
+
+#header .banner {
   position: relative;
+  margin: 0px;
+}
+
+#header .logo {
+    position: absolute;
+    top: 0.1em;
+    right: 5%;
 }
 
 #header .searchbox {
   position: absolute;
-  top: 1em;
-  right: 20em;
+  bottom: 0.5em;
+  right: 5%;
 }
+
 
 #content {
   padding: 2em 5% 0px 5%;
@@ -48,8 +70,9 @@
 #footer {
   clear: both;
   display: block;
-  background-color: #888;
-  color: #fff;
+  width: 90%;
+  padding: 0.1em 5% 0.5em 5%;
+  margin-top: 2em;
 }
 
 
@@ -67,6 +90,37 @@
  *  SPECIFIC ELEMENTS/WIDGETS
  */
 
+#header  {
+    background: #eee;
+ }
+
+#header .explain
+{
+  color: #444;
+  font-size: small;
+  background-color: #ccc;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+#header h1 { font-size: 175% }
+
+#footer {
+  background: #eee;
+  border-top: 1px solid black;
+  padding-top: 1em;
+  color: #444;
+  font-size: small;
+  position: relative;
+}
+
+#footer .copyright {
+    position: absolute;
+    right: 5%;
+    top: 1em;
+}
+
+
 .pagination {
   margin: 0.2em;
   padding: 0.2em;
@@ -75,9 +129,12 @@
 
 .pagination .current { font-weight: bold; }
 
-.nav { padding: 0 10px; }
+.nav { padding: 0.5em; 10px; }
+.nav a { padding: 5px 10px; }
+/*
 .nav a { padding: 5px 10px; color: #666; text-decoration: none; }
 .nav a:hover { background: #ccc; color: #333; }
+*/
 
 .nav ul { margin: 0; padding: 0; display: inline; }
 .nav ul li { float: left; list-style: none; margin: 0; padding: 0; }
