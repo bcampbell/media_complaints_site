@@ -3,19 +3,72 @@
 {% block title %}Search{% endblock %}
 
 {% block content %}
-<h2>Search</h2>
-<pre>{{query_string}}</pre>
+<h2>Search for cases</h2>
+
+{% load add_get_parameter %}
+<div id="refiners" class="box">
+<h3>Refine your results by...</h3>
+<div class="search-refiners">
+<h4>year:</h4>
+<ul>
+{% for r in date_refiner_list %}
+<li>
+{% if r.value == date_refine %}
+<strong>{{r.label}}</strong>
+{% else %}
+<a href="{% add_get_parameter date=r.value %}">{{r.label}}</a>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+</div>
+
+<div class="search-refiners">
+<h4>issue:</h4>
+<ul>
+{% for r in issue_refiner_list %}
+<li>
+{% if r.value == issue_refine %}
+<strong>{{r.label}}</strong>
+{% else %}
+<a href="{% add_get_parameter issue=r.value %}">{{r.label}}</a>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+</div>
+
+</div>
+
+<div>
+    <form action="{% url search %}" method="get">
+    Find cases containing
+       <input type="text" name="q" value="{{query_string}}" />
+  <input type="submit" value="Search">
+    </form>
+</div>
+
+<br/>
+<br/>
+<br/>
+
 
 {% load pagination_tags %}
 {% autopaginate case_list 50 %}
 
-{% paginate %}
 <ul>
 {% for case in case_list %}
-<li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
+<li>
+    <a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}
+    {% if case.summary %}<br/><span class="case-summary">{{case.summary}}</span>{% endif %}
+</li>
+{% empty %}
+<p>None matching</p>
 {% endfor %}
 </ul>
 {% paginate %}
+
+
 
 
 {% endblock %}

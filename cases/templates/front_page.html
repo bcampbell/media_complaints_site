@@ -16,7 +16,7 @@
 </div>
 
 <div class="box top_list">
-<h3>Top defendants</h3>
+<h3>Top publcations</h3>
 <ul>
 {% for ent in top_defendants %}
 <li><a href="{{ ent.get_absolute_url }}">{{ent}}</a> <span class="case-count">{{ent.num_cases}} complaints</span></li>

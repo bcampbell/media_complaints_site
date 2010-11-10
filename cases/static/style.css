@@ -92,6 +92,11 @@
     width: 90%;
 }
 
+#refiners {
+    float: right;
+    clear: both;
+}
+
 /*
  *  SPECIFIC ELEMENTS/WIDGETS
  */
@@ -130,7 +135,7 @@
 .pagination {
   margin: 0.2em;
   padding: 0.2em;
-  border: 1px solid black;
+/*  border: 1px solid black; */
 }
 
 .pagination .current { font-weight: bold; }
@@ -155,3 +160,6 @@
     padding: 0px;
     margin: 0px;
 }
+
+.search-refiners h4 { border-top: 1px solid #ccc; }
+

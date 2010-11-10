@@ -38,6 +38,10 @@ def clause_detail(request, clause_id ):
 
 from helpers import get_query
 
+
+
+
+
 def search(request):
     query_string = ''
     found = None
@@ -47,9 +51,50 @@ def search(request):
         entry_query = get_query(query_string, ['title', 'summary', 'complaint', 'defendants__name', 'complainants__name', 'detail__content'])
 
         found = Case.objects.filter(entry_query)    #.order_by('-date_of_decision')
+    else:
+        query_string = ''
+        found = Case.objects.all()
+
+
+    class Refiner:
+        def __init__(self, label,value ):
+            self.label=label
+            self.value=value
+
+    # refine by date
+    date_refiner_list = [ Refiner( 'All','all') ]
+    years = range(1996,2011)
+    years.reverse()
+    for year in years:
+        date_refiner_list.append( Refiner( str(year), str(year) ) )
+
+    date_refine = 'all'
+    if ('date' in request.GET) and request.GET['date'].strip():
+        date_refine = request.GET['date'].strip()
+
+
+    if date_refine != 'all':
+        found = found.filter( date_of_decision__year=int(date_refine) )
+
+
+    # refine by issue
+    issue_refiner_list = [ Refiner( c.prettyname,str(c.id) ) for c in Clause.objects.all().order_by( 'id' ) ]
+    issue_refiner_list.insert(0, Refiner( 'All','all') )
+    issue_refine = 'all'
+    if ('issue' in request.GET) and request.GET['issue'].strip():
+        issue_refine = request.GET['issue'].strip()
+    if issue_refine != 'all':
+#        c = Clause.objects.get( pk=int(issue_refine) )
+        found = found.filter( clauses__id=issue_refine )
 
     return render_to_response('search.html',
-                          { 'query_string': query_string, 'case_list': found },
+                          { 'query_string': query_string,
+                            'case_list': found,
+                            'date_refine': date_refine,
+                            'date_refiner_list': date_refiner_list,
+                            'issue_refine': issue_refine,
+                            'issue_refiner_list': issue_refiner_list,
+                          },
                           context_instance=RequestContext(request))
 
 
