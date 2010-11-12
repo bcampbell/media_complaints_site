@@ -2,6 +2,8 @@
 import os
 import sys
 import datetime
+import re
+import base64
 
 from django.core.management import setup_environ
 import settings
@@ -10,7 +12,7 @@ setup_environ(settings)
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from issues.models import *
+from cases.models import *
 
 import MySQLdb
 import MySQLdb.cursors
@@ -19,7 +21,7 @@ _conn = None
 
 
 
-def add_complaint( row ):
+def OLD_add_complaint( row ):
 
     issue = Issue()
     if row['checked']:
@@ -63,7 +65,7 @@ def add_complaint( row ):
         except ValueError:
             pass
         if n is None or n<1 or n>16:
-            print "id %s: Bad complaint_code '%s'" % ( row['id'], c )
+            print "%s: WARN Bad complaint_code '%s'" % ( row['id'], c )
             continue
 
         code, created = ComplaintCode.objects.get_or_create( clause=c )
@@ -110,6 +112,130 @@ def add_complaint( row ):
 
 
 
+def get_article_id( old ):
+    """ get pcc article id from urls """
+    urls = get_urls(old, 'pcc.org.uk' )
+    if len(urls)==0:
+        return
+    assert len(urls)==1
+    url = urls[0]
+
+    id_pat = re.compile( 'article=(.+?)(?:http://.*)?$' )
+    m = id_pat.search( url )
+    if m is None:
+        print "%s: WARNING: couldn't extract article id from url '%s'" %( old['id'],url )
+        return None
+
+    encoded_id = m.group(1)
+    if not encoded_id.endswith('=='):
+        # missing padding
+        assert len(encoded_id) == 6
+        encoded_id = encoded_id + "=="
+    article_id = int( base64.urlsafe_b64decode( encoded_id ) )
+    return article_id
+
+
+
+
+
+def find_cases( old ):
+    """ find case(s) in new db, corresponding to the ones in the old one """
+    cases = []
+
+    method = "not found"
+
+    legacy_id = get_article_id( old )
+    if legacy_id is not None:
+        cases = Case.objects.filter( legacy_id=legacy_id )
+        if cases.count() > 0:
+            method = "article_id"
+
+#    if not cases and old['complaint'].split()>10:
+#        cases = Case.objects.filter( complaint__icontains=old['complaint'].strip() )
+#        if cases.count() > 0:
+#            method = "text"
+
+    #print old['id'], method
+
+    return [ case.pk for case in cases ]
+
+def get_urls(old, match):
+    """ get list of urls attached to story in old db """
+    urls = []
+    for f in ( 'url_of_story', 'url_of_story_2' ):
+        url = old[f]
+        if url is None:
+            continue
+        url = url.strip()
+        if url=='':
+            continue
+        if match in url:
+            urls.append( url )
+    return urls
+
+
+def build_case_map():
+    cursor = _conn.cursor()
+    cursor.execute ("SELECT id,complaint,url_of_story,url_of_story_2 FROM complaints WHERE complaint_body='PCC'")
+
+    # mapping from old db id to new cases in django db
+    case_map = {}
+
+    found = 0
+    total = 0
+    for row in cursor:
+        cases = find_cases( row )
+        if len(cases)>1:
+            print "%s: WARNING: multiple cases" % (row['id'],)
+            cases = []
+
+        assert row['id'] not in case_map
+        case_map[ row['id'] ] = cases
+        if len(cases)==1:
+            found=found+1
+            print row['id'] , "->", cases
+        else:
+            print "%s: WARNING: can't find case in new db" % (row['id'],)
+        total=total+1
+
+    print found,"/",total
+    cursor.close()
+    return case_map
+
+
+def get_complaint_keywords( old ):
+
+    raw = old['complaint_keyword']
+    if old['complaint_keyword_2']:
+        raw = raw + ',' + old['complaint_keyword_2']
+    if old['complaint_keyword_3']:
+        raw = raw + ',' + old['complaint_keyword_3']
+
+    fixups = {
+            'Dicrimination': 'Discrimination',
+            'Deat': 'Death',
+            'Factual Error': 'Factual error',
+            'Inaccuray': 'Inaccuracy',
+            'Photogragph': 'Photograph',
+            'Photographs': 'Photograph',
+            'Photography': 'Photograph',
+            'Relationship': 'Relationships',
+            'Right to Reply': 'Right to reply',
+            }
+    tags = raw.split(',')
+    tags = [ t.strip() for t in tags ]
+    tags = [ t for t in tags if t ]
+    tags = [fixups.get(t,t) for t in tags]
+    tags = list( set(tags) )    #uniquify
+    return tags
+
+
+def add_tags( case, tags ):
+    for t in tags:
+        tag_obj, created = Tag.objects.get_or_create( name__iexact=t )
+        tag_obj.save()
+        case.tags.add( tag_obj )
+
 
 def main():
     global _conn
@@ -118,14 +244,27 @@ def main():
                             passwd = "",
                             db = "complaints",
                             cursorclass=MySQLdb.cursors.DictCursor )
+    print "build case map"
+    case_map = build_case_map()
 
+    print "add tags, summaries.."
     cursor = _conn.cursor()
     cursor.execute ("SELECT * FROM complaints WHERE complaint_body='PCC'")
     for row in cursor:
-        add_complaint( row )
-    cursor.close()
-    _conn.close()
+        tags = get_complaint_keywords( row )
 
+        print row['id']
+        cases = case_map[row['id']]
+        for case_id in cases:
+            case = Case.objects.get( pk=case_id )
+            add_tags( case, tags )
+            if case.summary == '':
+                case.summary = row['complaint_title']
+                case.save()
+
+    cursor.close()
+
+    _conn.close()
 
 main()
 

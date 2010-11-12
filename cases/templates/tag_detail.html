@@ -5,7 +5,7 @@
 {% block content %}
 <h2>{{ tag.name}}</h2>
 
-<p>cases marked <em>{{ tag.name }}</em>:</p>
+<p>{{tag.case_set.count}} complaints tagged with <em>{{ tag.name }}</em>:</p>
 <ul>
     {% for case in tag.case_set.all %}
     <li>

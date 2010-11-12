@@ -12,7 +12,7 @@
 {% paginate %}
 <ul>
 {% for tag in tag_list %}
-<li><a href="{{ tag.get_absolute_url }}">{{tag.name}}</a></li>
+<li><a href="{{ tag.get_absolute_url }}">{{tag.name}}</a><span class="case-count">{{tag.case_set.count}} complaints</span></li>
 {% endfor %}
 </ul>
 {% paginate %}
