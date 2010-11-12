@@ -17,9 +17,9 @@ class CaseAdmin(admin.ModelAdmin):
 
     list_filter = [ 'checked', 'clauses','tags', 'defendants']
     search_fields = ['title','description','summary']
-    raw_id_fields = ('related_cases', )
+#    raw_id_fields = ('related_cases', )
     inlines = [DetailInline,]
-    filter_horizontal = ['offending_articles','related_cases','related_links','complainants','defendants','clauses']
+    filter_horizontal = ['offending_articles','related_cases','related_links','complainants','defendants','clauses','related_cases']
 
 class ArticleAdmin(admin.ModelAdmin):
     filter_horizontal = ['authors',]

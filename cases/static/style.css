@@ -56,9 +56,13 @@
 }
 
 #header .searchbox {
-  position: absolute;
+    float:right;
+    margin-top: -0.3em;
+    padding-top: 0px;
+/*  position: absolute;
   bottom: 0.5em;
   right: 5%;
+  */
 }
 
 
@@ -107,14 +111,16 @@
 
 #header .explain
 {
-  color: #444;
+  color: #888;
   font-size: small;
-  background-color: #ccc;
+  font-style: italic;
+/*  background-color: #ccc; */
   padding: 0.5em;
   margin-bottom: 0.5em;
 }
 
-#header h1 { font-size: 175% }
+#header h1 { font-size: 175%; margin-bottom: 0px; }
+#header h1 span { font-size: 75%; margin-bottom: 1em; color: #888; }
 
 #footer {
   background: #eee;
@@ -140,7 +146,10 @@
 
 .pagination .current { font-weight: bold; }
 
-.nav { padding: 0.5em; 10px; }
+.nav { padding: 0.5em; 10px;
+    background-color: #ddd;
+    -moz-border-radius: 0.5em 0.5em 0px 0px;
+ }
 .nav a { padding: 5px 10px; }
 /*
 .nav a { padding: 5px 10px; color: #666; text-decoration: none; }

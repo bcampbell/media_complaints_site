@@ -105,8 +105,10 @@ def front_page(request):
     context['top_tags'] = Tag.objects.all().annotate( num_cases=Count('case') ).order_by('-num_cases')[:10]
     context['top_issues'] = Clause.objects.all().annotate( num_cases=Count('case') ).order_by('-num_cases')
 
-    celeb = Tag.objects.get( name='Celebrity' )
-    context['notable_case_list'] = Case.objects.filter( tags__in=[celeb] )
+    #celeb = Tag.objects.get( name='Celebrity' )
+    #context['notable_case_list'] = Case.objects.filter( tags__in=[celeb] )
+    model_cases = (396,574,59,774,170)
+    context['notable_case_list'] = Case.objects.filter( pk__in=model_cases )
 
     return render_to_response('front_page.html', context)
 

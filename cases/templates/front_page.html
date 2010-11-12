@@ -16,7 +16,7 @@
 </div>
 
 <div class="box top_list">
-<h3>Top publcations</h3>
+<h3>Top publications</h3>
 <ul>
 {% for ent in top_defendants %}
 <li><a href="{{ ent.get_absolute_url }}">{{ent}}</a> <span class="case-count">{{ent.num_cases}} complaints</span></li>
@@ -43,8 +43,11 @@ These are some of the most high profile cases the PCC has dealt with in recent y
 them to add as much contextual information as possible.
 </p>
 <ul>
-{% for case in notable_case_list %}
-<li><a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}</li>
+  {% for case in notable_case_list %}
+  <li>
+    <a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}
+    {% if case.summary %}<br/><span class="case-summary">{{case.summary}}</span>{% endif %}
+  </li>
 {% endfor %}
 </ul>
     <p>
