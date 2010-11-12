@@ -11,7 +11,9 @@
 {% paginate %}
 <ul>
 {% for ent in defendant_list %}
+{% if ent.name %}
 <li><a href="{{ ent.get_absolute_url }}">{{ent}}</a></li>
+{% endif %}
 {% endfor %}
 </ul>
 {% paginate %}

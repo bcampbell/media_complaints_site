@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2>Issues</h2>
-
+<p>These are from the PCC <a href="http://pcc.org.uk/code/index.html">Editors' Code of Practice</a>:</p>
 
 {% load pagination_tags %}
 {% autopaginate clause_list 50 %}
@@ -12,7 +12,7 @@
 {% paginate %}
 <ul>
 {% for clause in clause_list %}
-<li><a href="{{ clause.get_absolute_url }}">{{clause.prettyname}}</a></li>
+<li><a href="{{ clause.get_absolute_url }}">{{clause.prettyname}}</a> <span class="case-count">{{clause.case_set.count}} complaints</span></li>
 {% endfor %}
 </ul>
 {% paginate %}
