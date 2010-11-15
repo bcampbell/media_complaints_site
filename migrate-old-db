@@ -173,6 +173,50 @@ def add_tags( case, tags ):
         case.tags.add( tag_obj )
 
 
+def get_related_cases( old,case_map ):
+    related = set()
+
+    raw = old['related_complaint']
+
+    # "382-8" => "382-388"
+    raw = re.sub( r'\b(\d+)(\d)-(\d)\b', r'\1\2-\1\3', raw )
+
+    # 1258-1261 => "1258,1259,1260,1261"
+    def repl( m ):
+        return ','.join( [str(i) for i in range( int(m.group(1)),int(m.group(2))+1 ) ] )
+    raw = re.sub( r'\b(\d+)-(\d+)\b', repl, raw )
+
+#    if raw:
+#        print old['id'], "---->", raw
+
+    for r in raw.split(','):
+        r=r.strip()
+        if r == '':
+            continue
+        old_id = int(r)
+        new_id = case_map[old_id]
+        related.update(new_id)
+#    if raw:
+#        print old['id'], "====>", related
+    return related
+
+
+
+def add_related_cases( case, related_ids ):
+
+    changed = False
+
+    for id in related_ids:
+        if id==case.pk or case.related_cases.filter(pk=id).count()>0:
+            continue
+        else:
+            print "%s: added related case %s" % (case.id, id )
+            case.related_cases.add( Case.objects.get(pk=id) )
+            changed = True
+    return changed
+
+
+
 def main():
     global _conn
 
@@ -200,6 +244,7 @@ def main():
     cursor.execute ("SELECT * FROM complaints WHERE complaint_body='PCC'")
     for row in cursor:
         tags = get_complaint_keywords( row )
+        related = get_related_cases( row,case_map)
 
 #        print row['id']
         cases = case_map[row['id']]
@@ -212,9 +257,17 @@ def main():
                 case.summary = row['complaint_title'].strip()
                 print "%s: case %d: set summary" % (row['id'],case.pk,)
                 case.save()
+
+
             # add split cases as related cases:
 
+            all_related = related.union( set([ c for c in cases if c != case_id ]) )
+            if all_related:
+#                print "all_related: ", all_related
+                add_related_cases( case, related )
 
+#            if related_case_ids:
+#                print cases, related_case_ids
 
     cursor.close()
 
