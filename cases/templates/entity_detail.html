@@ -22,7 +22,7 @@
       //alert( column + $(this).text() );
 //    } );
 
-    data.addColumn('string', 'Clause');
+    data.addColumn('string', 'Issue');
     data.addColumn('number', 'Number of complaints');
 
     data.addRows( $('tbody tr').size() );
@@ -51,7 +51,7 @@
 <div id="clause_stats">
 <h3>Complaints by issue</h3>
 <table>
-  <thead><tr><th>Clause</th><th>Number of complaints</th></tr></thead>
+  <thead><tr><th>Issue</th><th>Number of complaints</th></tr></thead>
   <tbody>
 {% for c in clause_stats %}
   <tr><td>{{c}}</td><td>{{c.num_cases}}</td></tr>
