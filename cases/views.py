@@ -87,6 +87,15 @@ def search(request):
 #        c = Clause.objects.get( pk=int(issue_refine) )
         found = found.filter( clauses__id=issue_refine )
 
+    # refine by outcome
+    outcome_refiner_list = [ Refiner( o.name,str(o.id) ) for o in Outcome.objects.all().order_by( 'name' ) ]
+    outcome_refiner_list.insert(0, Refiner( 'All','all') )
+    outcome_refine = 'all'
+    if ('outcome' in request.GET) and request.GET['outcome'].strip():
+        outcome_refine = request.GET['outcome'].strip()
+    if outcome_refine != 'all':
+        found = found.filter( outcome__id=outcome_refine )
+
     return render_to_response('search.html',
                           { 'query_string': query_string,
                             'case_list': found,
@@ -94,6 +103,8 @@ def search(request):
                             'date_refiner_list': date_refiner_list,
                             'issue_refine': issue_refine,
                             'issue_refiner_list': issue_refiner_list,
+                            'outcome_refine': outcome_refine,
+                            'outcome_refiner_list': outcome_refiner_list,
                           },
                           context_instance=RequestContext(request))
 

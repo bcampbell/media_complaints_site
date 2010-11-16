@@ -38,6 +38,21 @@
 </ul>
 </div>
 
+<div class="search-refiners">
+<h4>outcome:</h4>
+<ul>
+{% for r in outcome_refiner_list %}
+<li>
+{% if r.value == outcome_refine %}
+<strong>{{r.label}}</strong>
+{% else %}
+<a href="{% add_get_parameter outcome=r.value %}">{{r.label}}</a>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+</div>
+
 </div>
 
 <div>
