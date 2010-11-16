@@ -5,6 +5,7 @@ import datetime
 import re
 import base64
 import pickle
+import urlparse
 
 from django.core.management import setup_environ
 import settings
@@ -20,9 +21,73 @@ import MySQLdb.cursors
 
 _conn = None
 
-
+# takes a while to figure out mapping from old case IDs to the new ones, so we'll be saving it out to a file.
 CASEMAPFILE = 'case_map'
 
+
+
+# map of newspaper names to domains
+newspaper_domain_map = {
+    'barking & dagenham post': ('www.bdpost.co.uk',),
+    'bedfordshire on sunday': ('www.bedsonsunday.com',),
+    'birmingham post': ('www.birminghampost.net',),
+    'bolton news': ('www.theboltonnews.co.uk',),
+    'british medical journal': ('www.bmj.com',),
+    'bury times': ('www.burytimes.co.uk',),
+    'camden new journal': ('www.camdennewjournal.co.uk',),
+    'community care': ('www.communitycare.co.uk',),
+    'cornish guardian': ('www.thisiscornwall.co.uk',),
+    'croydon guardian': ('www.croydonguardian.co.uk',),
+    'daily mail': ('www.dailymail.co.uk',),
+    'daily mirror': ('www.mirror.co.uk','www.mirrorfootball.co.uk'),
+    'daily star': ('www.dailystar.co.uk',),
+    'daily telegraph': ('www.telegraph.co.uk',),
+    'evening standard': ('www.thisislondon.co.uk',),
+    'financial times': ('search.ft.com',),
+    'gazette & herald': ('www.gazetteandherald.co.uk',),
+    'greenock telegraph': ('www.greenocktelegraph.co.uk',),
+    'hamilton advertiser': ('www.hamiltonadvertiser.co.uk',),
+    'harrow observer': ('www.harrowobserver.co.uk',),
+    'independent': ('www.independent.co.uk',),
+    'isle of wight county press': ('www.iwcp.co.uk',),
+    'jewish chronicle': ('www.thejc.com',),
+    'lancashire evening post': ('www.lep.co.uk',),
+    'lancashire telegraph': ('www.lancashiretelegraph.co.uk',),
+    'liverpool echo': ('www.liverpoolecho.co.uk',),
+    'mail online': ('www.dailymail.co.uk',),
+    'mail on sunday': ('www.dailymail.co.uk','www.mailonsunday.co.uk',),
+    'metro': ('www.metro.co.uk',),
+    'new scientist': ('www.newscientist.com',),
+    'news of the world': ('www.newsoftheworld.co.uk',),
+    'nottingham evening post': ('www.thisisnottingham.co.uk',),
+    'press & journal': ('www.pressandjournal.co.uk',),
+    'sheffield star': ('www.thestar.co.uk',),
+    'shropshire star': ('www.shropshirestar.com',),
+    'southend echo': ('www.echo-news.co.uk',),
+    'stockport express': ('www.stockportexpress.co.uk',),
+    'sunday herald permanently deletes report on film produced by nil by mouth, which had provoked a complaint from mrs kim homer, from its archive.': ('www.heraldscotland.com',),
+    'sunday mail': ('www.sundaymail.co.uk',),
+    'sunday mirror': ('www.mirror.co.uk',),
+    'sunday times': ('www.timesonline.co.uk',),
+    'sunderland echo': ('www.sunderlandecho.com',),
+    'the argus': ('www.theargus.co.uk',),
+    'the barrhead news': ('www.barrheadnews.com',),
+    'the citizen / gloucestershire echo': ('www.thisisgloucestershire.co.uk',),
+    'the daily telegraph': ('www.telegraph.co.uk',),
+    'the guardian': ('www.guardian.co.uk',),
+    'the independent': ('www.independent.co.uk',),
+    'the mail on sunday': ('www.dailymail.co.uk',),
+    'the news': ('www.portsmouth.co.uk',),
+    'the people': ('www.people.co.uk',),
+    'the scotsman': ('heritage.scotsman.com', 'news.scotsman.com', 'thescotsman.scotsman.com',),
+    'the sunday times': ('www.timesonline.co.uk',),
+    'the sun': ('www.thesun.co.uk',),
+    'the times': ('business.timesonline.co.uk','www.timesonline.co.uk',),
+    'the times educational supplement': ('www.tes.co.uk',),
+    'uttoxeter advertiser': ('www.uttoxeteradvertiser.co.uk',),
+    'wiltshire times': ('archive.wiltshiretimes.co.uk',),
+    'worksop guardian': ('www.worksopguardian.co.uk',),
+}
 
 
 def get_article_id( old ):
@@ -99,7 +164,7 @@ def get_urls(old, match=None):
         url = url.strip()
         if url=='':
             continue
-        if (match is not None) and match in url:
+        if (match is None) or (match in url):
             urls.append( url )
     return urls
 
@@ -139,6 +204,55 @@ def build_case_map():
 
 
 
+def get_related_articles( old, publication_name ):
+    urls = get_urls(old)
+
+    # get rid of pcc links
+    urls = [ url for url in urls if 'pcc.org.uk' not in url ]
+    urls = [ url for url in urls if url.lower()!="not available" ]
+    urls = [ url for url in urls if url.lower()!="removed" ]
+
+
+    offending = []
+    related = []
+    for url in urls:
+        o = urlparse.urlparse( url )
+        domain = o[1].lower()
+        if domain=='':
+            continue
+        if domain in newspaper_domain_map.get( publication_name.lower(), () ):
+            offending.append( {'url':url, 'publication': publication_name } )
+        else:
+            related.append( {'url':url} )
+
+
+    return offending, related
+
+
+def add_offending_articles( case, articles ):
+    for art in articles:
+        if case.offending_articles.filter( url=art['url'] ).count() > 0:
+            continue
+        else:
+            pub = case.defendants.all()[0]
+            a = Article( url=art['url'], publication=pub )
+            a.save()
+            case.offending_articles.add( a )
+            print "case %d: add offending: %s (%s)" % (case.pk, a.url, a.publication.name)
+
+
+def add_related_articles( case, articles ):
+    for art in articles:
+        if case.related_links.filter( url=art['url'] ).count() > 0:
+            continue
+        else:
+            a = Article( url=art['url'] )
+            a.save()
+            case.related_links.add( a )
+            print "case %d: add related: %s" % (case.pk, a.url)
+
+
+
 def get_complaint_keywords( old ):
 
     raw = old['complaint_keyword']
@@ -171,6 +285,9 @@ def add_tags( case, tags ):
         tag_obj, created = Tag.objects.get_or_create( name__iexact=t )
         tag_obj.save()
         case.tags.add( tag_obj )
+
+
+
 
 
 def get_related_cases( old,case_map ):
@@ -234,17 +351,18 @@ def main():
         print "wrote ", CASEMAPFILE
         sys.exit(0)
 
-
     f = open( CASEMAPFILE, 'rb' )
     case_map = pickle.load( f )
     f.close()
 
-    print "add tags, summaries.."
+    print "slurping data over now..."
     cursor = _conn.cursor()
     cursor.execute ("SELECT * FROM complaints WHERE complaint_body='PCC'")
     for row in cursor:
+
         tags = get_complaint_keywords( row )
         related = get_related_cases( row,case_map)
+
 
 #        print row['id']
         cases = case_map[row['id']]
@@ -256,7 +374,6 @@ def main():
             if row['complaint_title'].strip() and case.summary == '':
                 case.summary = row['complaint_title'].strip()
                 print "%s: case %d: set summary" % (row['id'],case.pk,)
-                case.save()
 
 
             # add split cases as related cases:
@@ -264,10 +381,15 @@ def main():
             all_related = related.union( set([ c for c in cases if c != case_id ]) )
             if all_related:
 #                print "all_related: ", all_related
-                add_related_cases( case, related )
+                add_related_cases( case, all_related )
 
-#            if related_case_ids:
-#                print cases, related_case_ids
+            offending_arts,related_arts = get_related_articles( row, case.defendants.all()[0].name )
+
+            add_offending_articles( case, offending_arts )
+            add_related_articles( case, related_arts )
+
+
+            case.save()
 
     cursor.close()
 
