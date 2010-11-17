@@ -271,6 +271,7 @@ def get_complaint_keywords( old ):
             'Photography': 'Photograph',
             'Relationship': 'Relationships',
             'Right to Reply': 'Right to reply',
+            'Privay': 'Privacy',
             }
     tags = raw.split(',')
     tags = [ t.strip() for t in tags ]
@@ -282,10 +283,20 @@ def get_complaint_keywords( old ):
 
 def add_tags( case, tags ):
     for t in tags:
+        t=t.strip()
+        if t.strip() == '':
+            continue
+
+        if case.tags.filter( name__iexact=t ).count() > 0:
+            continue
+
         tag_obj, created = Tag.objects.get_or_create( name__iexact=t )
-        tag_obj.save()
+        if created:
+            tag_obj.name = t
+            tag_obj.save()
         case.tags.add( tag_obj )
 
+        print "case %d: add tag '%s'" % (case.pk,tag_obj.name)
 
 
 
@@ -368,8 +379,7 @@ def main():
         cases = case_map[row['id']]
         for case_id in cases:
             case = Case.objects.get( pk=case_id )
-            if tags and case.tags.count()==0:
-                print "%s: case %d: add tags" % (row['id'],case.pk,)
+            if tags:
                 add_tags( case, tags )
             if row['complaint_title'].strip() and case.summary == '':
                 case.summary = row['complaint_title'].strip()
