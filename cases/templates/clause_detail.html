@@ -6,9 +6,11 @@
 {% block content %}
 <h2>{{clause.prettyname}}</h2>
 
+{% if clause.explanation %}
 <div class="box">
 {{ clause.explanation|markdown }}
 </div>
+{% endif %}
 
 <p>{{ clause.case_set.all.count }} complaints about <strong>{{clause.prettyname}}</strong>:</p>
 <ul>
