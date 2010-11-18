@@ -1,0 +1,28 @@
+Index: django/contrib/admin/media/js/SelectBox.js
+===================================================================
+--- django/contrib/admin/media/js/SelectBox.js  (revision 4123)
++++ django/contrib/admin/media/js/SelectBox.js  (working copy)
+@@ -11,14 +11,21 @@
+     },
+     redisplay: function(id) {
+         // Repopulate HTML select box from cache
++       // Remove the box from the DOM, manipulate it, then insert again
++       // (offline DOM manipulation = better performance)
+         var box = document.getElementById(id);
++       var parent = box.parentNode;
++       var nextSibling = box.nextSibling; // remember where the node was
++       parent.removeChild(box);
+         box.options.length = 0; // clear all options
+-        for (var i = 0, j = SelectBox.cache[id].length; i < j; i++) {
+-            var node = SelectBox.cache[id][i];
++       var cache = SelectBox.cache[id];
++        for (var i = 0, j = cache.length; i < j; i++) {
++            var node = cache[i];
+             if (node.displayed) {
+                 box.options[box.options.length] = new Option(node.text, node.value, false, false);
+             }
+         }
++       parent.insertBefore(box,nextSibling); // insert back in place
+     },
+     filter: function(id, text) {
+         // Redisplay the HTML select box, displaying only the choices containing ALL
