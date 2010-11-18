@@ -19,7 +19,7 @@ class CaseAdmin(admin.ModelAdmin):
     search_fields = ['title','description','summary']
 #    raw_id_fields = ('related_cases', )
     inlines = [DetailInline,]
-    filter_horizontal = ['offending_articles','related_cases','related_links','complainants','defendants','clauses','related_cases']
+    filter_horizontal = ['offending_articles','related_cases','related_links','complainants','defendants','clauses','related_cases','tags']
 
 class ArticleAdmin(admin.ModelAdmin):
     filter_horizontal = ['authors',]
