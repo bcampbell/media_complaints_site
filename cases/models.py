@@ -43,13 +43,9 @@ class Clause( models.Model ):
     """ which code of conduct was (allegedly) violated """
 
     # eg PCC clause number, or OfCom rule
-    ident = models.CharField(max_length=64)
-
+    ident = models.CharField(max_length=64, help_text="The PCC code" )
     prettyname = models.CharField(max_length=512)
-    # TODO: add:
-    # - link to code of practice
-    # - explanation text (use markdown)
-
+    explanation = models.TextField( blank=True, help_text="Explanation of clause (markdown formatting)" )
     def __unicode__(self):
         return self.prettyname
 
@@ -65,7 +61,7 @@ class Clause( models.Model ):
 class Outcome( models.Model ):
     """ eg "resolved" "adjudicated" etc... """
     name = models.CharField( max_length=64 )
-
+    explanation = models.TextField( blank=True, help_text="Explanation of outcome (markdown formatting)" )
     def __unicode__(self):
         return self.name
 
@@ -127,7 +123,7 @@ class Case(models.Model):
 
     outcome = models.ForeignKey( Outcome, null=True )
 
-    url_of_complaint = models.URLField(max_length=512, verify_exists=False, blank=True, help_text="")
+    url_of_complaint = models.URLField(max_length=512, verify_exists=False, blank=True, help_text="The URL of the complaint on the PCC site")
     date_scraped = models.DateTimeField( blank=True,null=True )
 
     related_cases = models.ManyToManyField( "self",blank=True, help_text="Other complaints related to this one" )

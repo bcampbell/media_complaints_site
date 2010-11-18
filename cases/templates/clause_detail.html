@@ -1,16 +1,14 @@
 {% extends "base.html" %}
+{% load markup %}
 
 {% block title %}{{ clause.prettyname }}{% endblock %}
 
 {% block content %}
-<h2>{{ clause.ident}} - {{clause.prettyname}}</h2>
-<!--
-<em>
-    <p>
-    Description and background information about this clause goes here, along with links to code of practice.
-    </p>
-</em>
--->
+<h2>{{clause.prettyname}}</h2>
+
+<div class="box">
+{{ clause.explanation|markdown }}
+</div>
 
 <p>{{ clause.case_set.all.count }} complaints about <strong>{{clause.prettyname}}</strong>:</p>
 <ul>
