@@ -67,7 +67,7 @@
 <br/>
 <br/>
 
-
+<p>{{ case_list.count }} matching:</p>
 {% load pagination_tags %}
 {% autopaginate case_list 50 %}
 
@@ -77,8 +77,6 @@
     <a href="{{ case.get_absolute_url }}">{{case.title}}</a> {{case.date_of_decision}}
     {% if case.summary %}<br/><span class="case-summary">{{case.summary}}</span>{% endif %}
 </li>
-{% empty %}
-<p>None matching</p>
 {% endfor %}
 </ul>
 {% paginate %}
