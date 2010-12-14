@@ -11,6 +11,7 @@ import json
 import pprint
 import dateutil.parser
 import re
+import optparse
 
 from django.core.management import setup_environ
 import settings
@@ -23,26 +24,27 @@ from cases.models import *
 
 
 _conn = None
-
+_opts = None
 
 # cheesiness for local load
-f = open( "../pcc_scraper/output.json" )
-json_data = f.read()
-f.close()
-incoming_data = json.loads( json_data )
+#f = open( "../pcc_scraper/output.json" )
+#json_data = f.read()
+#f.close()
+#incoming_data = json.loads( json_data )
 #fudge
-for c in incoming_data:
-    c['date_scraped'] = datetime.datetime.now().isoformat( ' ' )
+#for c in incoming_data:
+#    c['date_scraped'] = datetime.datetime.now().isoformat( ' ' )
+#
+#def slurp_batch( offset, limit ):
+#    return incoming_data[offset:offset+limit]
+#
 
 def slurp_batch( offset, limit ):
-    return incoming_data[offset:offset+limit]
-
-def OLD_slurp_batch( offset, limit ):
 
     url = "http://api.scraperwiki.com/api/1.0/datastore/getdata"
 
     params = { 'format': 'json',
-        'name': 'pcc-decisions',
+        'name': 'pcc-decisions-mark-3',
         'limit': str(limit),
         'offset': str(offset) }
     url = url + "?" + urllib.urlencode( params )
@@ -88,22 +90,15 @@ def process( c ):
     if existing:
         return
 
-    publications = re.split( r'\s*/\s*', c['Publication'] )
-    if len( publications ) > 1:
-        print "splitting %s ('%s')" % ( c['url'], c['Publication'] )
-    new_cases = []
-    for pub in publications:
-        c2 = c
-        c2['Publication'] = pub
-        new_cases.append( add_case(c2) )
+    if 'Publication' not in c:
+        print "SKIP blank record %s" % ( c['url'], )
+        return
 
-    # if multiple cases, make them related:
-    for case in new_cases:
-        for other in new_cases:
-            if other.pk == case.pk:
-                continue
-            case.related_cases.add( other )
+    if _opts.dry_run:
+        print "dry run - would have added %s (pubdate: %s)" % ( c['url'],c['Date_Published'] )
+        return
 
+    add_case( c )
 
 
 def add_case( c ):
@@ -197,12 +192,8 @@ def add_case( c ):
     # nice and easy to identify multiples:
 
     publications = re.split( r'\s*/\s*', c['Publication'] )
-
-    # we now split up complaints against multiple publications
-    assert( len(publications) == 1 )
-#    if len( publications ) >1:
-#        print "multiple publications: ", c['Publication'], "=>", publications
-
+    if len( publications ) >1:
+        print "multiple publications: ", c['Publication'], "=>", publications
     defendant_objs = []
     for publication in publications:
         about,created = Entity.objects.get_or_create( name=publication, kind='m' )
@@ -229,14 +220,21 @@ def add_case( c ):
         adj.save()
 
 
-    print "added %d" %  (case.pk )
+    print "added %s (pubdate: %s)" % ( c['url'],c['Date_Published'] )
 
     return case
 
 
 
 def main():
-    load_pcc_clauses()
+    global _opts
+
+    parser = optparse.OptionParser()
+    parser.add_option('-d', '--dry-run', action='store_true', dest='dry_run', help="Don't modify the database" )
+    (_opts, args) = parser.parse_args(sys.argv)
+
+    if not _opts.dry_run:
+        load_pcc_clauses()
 
     errcnt = 0
     offset = 0
@@ -277,5 +275,6 @@ def main():
 
         offset = offset + limit
 
-main()
+if __name__ == '__main__':
+    main()
 
