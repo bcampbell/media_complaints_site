@@ -14,13 +14,13 @@
             <h1><a href="{% url front-page %}">Press complaints (the unofficial site)</a> <span> - alpha</span></h1>
         <div class="explain">A user-friendly version of PCC complaints going back to 1996</div>
         <div class="logo">
-            <a href="http://mediastandardstrust.org"><img src="/static/mst_logo.png" alt="MST logo"/></a>
+            <a href="http://mediastandardstrust.org"><img src="/static/mst_logo_small.png" alt="MST logo"/></a>
         </div>
         <div class="nav">
-            View complaints by: <a href="{% url search %}">Case</a>
-            <a href="{% url defendant-list %}">Publication</a>
-            <a href="{% url complainant-list %}">Complainant</a>
-            <a href="{% url clause-list %}">Issue</a>
+            <a href="{% url search %}">Complaints</a>
+            <a href="{% url defendant-list %}">Publications</a>
+            <a href="{% url complainant-list %}">Complainants</a>
+            <a href="{% url clause-list %}">Issues</a>
             <a href="{% url tag-list %}">Tags</a>
 
         <div class="searchbox">
@@ -39,14 +39,16 @@
     {% block content %}{% endblock %}
     </div>
     <div id="footer">
-        <div></div>
-        <div id="data_sources">
-            * Complaints taken and repurposed from www.pcc.org.uk with further data added by MST
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>Got any feedback?</strong> <a href="mailto:martin.moore@mediastandardstrust.org">Email us</a>.
-        </div>
-        <div class="copyright">
-            &copy; Media Standards Trust 2010
-        </div>
+      <div class="nav">
+        <a href="/about">About this site</a>
+        <a href="mailto:martin.moore@mediastandardstrust.org">Contact us</a>
+      </div>
+      <div id="data_sources">
+        * Complaints taken and repurposed from www.pcc.org.uk with further data added by MST
+      </div>
+      <div class="copyright">
+          &copy; Media Standards Trust 2010
+      </div>
     </div>
 </body>
 </html>

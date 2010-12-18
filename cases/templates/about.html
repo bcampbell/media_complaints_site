@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+
+<h2>About</h2>
+
+<p>
+This site takes complaints from the <a href="http://www.pcc.org.uk">Press Complaints Commission</a>, augments them with further data and presents them in a nice easy-to-browse way.
+</p>
+
+<p>
+The source code is available <a href="http://github.com/bcampbell/media_complaints_site">here</a>, under the GNU Affero General Public License.
+</p>
+
+
+<img src="/static/mst_logo_small.png" alt="MST logo" />
+<p>This site is a <a href="http://mediastandardstrust.org">Media Standards Trust</a> project.<br/>
+It was built by <a href="http://scumways.com">Ben Campbell</a>, based on an outline by Matthew Cain and with feedback from Martin Moore.<br/>
+Camilla Schick and Charlotte Hawkins
+added data to the complaints by hand. They tracked down links to articles,
+found related complaints and wrote understandable descriptions.
+</p>
+
+<img src="/static/scraperwiki_logo.png" alt="ScraperWiki logo" />
+<p>The PCC data is extracted using a scraper hosted on <a href="http://www.scraperwiki.com">ScraperWiki</a>.<br/>
+See <a href="http://scraperwiki.com/scrapers/pcc-decisions-mark-3/">http://scraperwiki.com/scrapers/pcc-decisions-mark-3/</a> for code and raw data.
+</p>
+
+
+<a href="http://www.djangoproject.com/"><img src="http://media.djangoproject.com/img/badges/djangomade124x25_grey.gif" border="0" alt="Made with Django." title="Made with Django." /></a>
+<p>The site was implemented using the <a href="http://www.djangoproject.com/">Django</a> framework, and uses <a href="http://code.google.com/p/css-boilerplate/">boilerplate.css</a><br/>
+</p>
+
+{% endblock %}
+
