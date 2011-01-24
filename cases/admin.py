@@ -24,7 +24,15 @@ class CaseAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     filter_horizontal = ['authors',]
 
-admin.site.register(Entity)
+
+class EntityAdmin(admin.ModelAdmin):
+    # ...
+    list_display = ('id','name','kind' )
+    list_display_links = ('id','name' )
+    list_filter = [ 'kind', ]
+    search_fields = ['name',]
+
+admin.site.register(Entity,EntityAdmin)
 admin.site.register(Case,CaseAdmin)
 admin.site.register(Tag)
 admin.site.register(Clause)
