@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# import complaints from the PCC website, using the scraperwiki pcc-decisions scraper
+# import complaints from the PCC website, via the scraperwiki pcc-decisions-mark-3 scraper
 #
 import os
 import sys
@@ -12,6 +12,7 @@ import pprint
 import dateutil.parser
 import re
 import optparse
+import logging
 
 from django.core.management import setup_environ
 import settings
@@ -84,26 +85,22 @@ def load_pcc_clauses():
             clause.save()
 
 
-def process( c ):
-    # don't add ones we've already got
-    existing = Case.objects.filter( legacy_id = str(c['id']) )
-    if existing:
-        return
-
-    if 'Publication' not in c:
-        print "SKIP blank record %s" % ( c['url'], )
-        return
-
-    if _opts.dry_run:
-        print "dry run - would have added %s (pubdate: %s)" % ( c['url'],c['Date_Published'] )
-        return
-
-    add_case( c )
-
 
 def add_case( c ):
     assert( 'url' in c )
 
+    case_title = u"%s v %s" % (c['Complainant_Name'],c['Publication'] )
+    logging.info( "add '%s' %s - %s" % ( case_title, c['Date_Published'], c['url'] ) )
+
+    # check for crud in title
+    borkpat =  re.compile( r'^\s*Resolved\s*-\s*', re.IGNORECASE )
+    if borkpat.search( case_title ):
+        new_title = borkpat.sub( u'', case_title )
+        logging.warn( "tidy title '%s' => '%s'" % (case_title, new_title) )
+        case_title = new_title
+
+    if _opts.dry_run:
+        return
 
     # incoming fields:
     #
@@ -156,7 +153,7 @@ def add_case( c ):
     if 'Report' in c:
         case.report = c['Report']
 
-    case.title = u"%s v %s" % (c['Complainant_Name'],c['Publication'] )
+    case.title = case_title
 
     case.outcome, created = Outcome.objects.get_or_create( name=outcome )
     if created:
@@ -193,7 +190,7 @@ def add_case( c ):
 
     publications = re.split( r'\s*/\s*', c['Publication'] )
     if len( publications ) >1:
-        print "multiple publications: ", c['Publication'], "=>", publications
+        logging.info( "split multiple publications: %s=>%s" % ( c['Publication'], publications ) )
     defendant_objs = []
     for publication in publications:
         about,created = Entity.objects.get_or_create( name=publication, kind='m' )
@@ -219,9 +216,6 @@ def add_case( c ):
         adj = Detail( content=c['Adjudication'], kind='adjudication', case=case )
         adj.save()
 
-
-    print "added %s (pubdate: %s)" % ( c['url'],c['Date_Published'] )
-
     return case
 
 
@@ -231,37 +225,57 @@ def main():
 
     parser = optparse.OptionParser()
     parser.add_option('-d', '--dry-run', action='store_true', dest='dry_run', help="Don't modify the database" )
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true" )
     (_opts, args) = parser.parse_args(sys.argv)
+
+    # set up logging
+    lvl = logging.WARNING
+    if _opts.verbose:
+        lvl = logging.INFO
+    logging.basicConfig(level=lvl, format='%(message)s')
+
 
     if not _opts.dry_run:
         load_pcc_clauses()
+    else:
+        logging.warning( 'performing dry run' )
 
     errcnt = 0
     offset = 0
     limit = 500
+    new_cnt = 0
     while True:
+        logging.info( 'fetching %s-%s' % (offset, offset+limit) )
         batch = slurp_batch( offset, limit )
-        print "got %d" % ( len(batch) )
         if len( batch ) == 0:
             break
 
         for complaint in batch:
             c = complaint
 
-            res = "nores"
-            if "Resolution" in c:
-                res = "  res"
-            adj = "noadj"
-            if "Adjudication" in c:
-                adj = "  adj"
-            desc = 'nodesc'
-            if "Decision" in c:
-                desc = c['Decision']
-
+#            res = "nores"
+#            if "Resolution" in c:
+#                res = "  res"
+#            adj = "noadj"
+#            if "Adjudication" in c:
+#                adj = "  adj"
+#            desc = 'nodesc'
+#            if "Decision" in c:
+#                desc = c['Decision']
 #            print "%s %s %s" % ( res, desc, adj )
 
             try:
-                process( complaint )
+                # don't add ones we've already got
+                existing = Case.objects.filter( legacy_id = str(c['id']) )
+                if existing:
+                    # TODO: check for changes?
+                    continue
+                if 'Publication' not in c:
+                    logging.warning( "skip blank record %s" % ( c['url'], ) )
+                    continue
+                new_cnt += 1
+                add_case( c )
+
             except Exception, e:
                 print "\n\n---------"
                 print "ERROR: ", e
@@ -270,10 +284,12 @@ def main():
                 print "---------\n\n"
                 errcnt = errcnt+1
                 if errcnt>100:
-                    print "TOO MANY ERRORS"
+                    logging.critical( "too many errors" )
                     raise
 
         offset = offset + limit
+    logging.info( "done - %d new cases" % new_cnt )
+
 
 if __name__ == '__main__':
     main()
