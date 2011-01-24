@@ -90,17 +90,16 @@ def add_case( c ):
     assert( 'url' in c )
 
     case_title = u"%s v %s" % (c['Complainant_Name'],c['Publication'] )
-    logging.info( "add '%s' %s - %s" % ( case_title, c['Date_Published'], c['url'] ) )
 
-    # check for crud in title
+    # check for crud in title and tidy it (TODO: move into scraper?)
     borkpat =  re.compile( r'^\s*Resolved\s*-\s*', re.IGNORECASE )
     if borkpat.search( case_title ):
         new_title = borkpat.sub( u'', case_title )
         logging.warn( "tidy title '%s' => '%s'" % (case_title, new_title) )
         case_title = new_title
 
-    if _opts.dry_run:
-        return
+
+    logging.info( "add '%s' %s - %s" % ( case_title, c['Date_Published'], c['url'] ) )
 
     # incoming fields:
     #
@@ -122,6 +121,13 @@ def add_case( c ):
     date_published = dateutil.parser.parse( c['Date_Published'], dayfirst=True )
     assert( date_published is not None )
 
+    if date_published > datetime.datetime.now():
+        logging.warning( "skip case with future date (%s) %s" % (c['Date_Published'],c['url']))
+        return
+
+
+    if _opts.dry_run:
+        return
 
     # create the PCC if it doesn't exist ;-)
     the_pcc, created = Entity.objects.get_or_create( name='PCC', kind='c' )
