@@ -1,0 +1,41 @@
+{% extends "admin/change_form.html" %}
+{% block after_field_sets %}{{ block.super }}
+
+<div>
+    <span>Is a defendant in:</span>
+    <ul>
+    {% for case in original.cases_as_defendant.all %}
+    <li><a href="{% url admin:cases_case_change case.id %}">{{ case }}</a></li>
+    {% endfor %}
+    </ul>
+
+    <span>Is a complainant in:</span>
+    <ul>
+    {% for case in original.cases_as_complainant.all %}
+    <li><a href="{% url admin:cases_case_change case.id %}">{{ case }}</a></li>
+    {% endfor %}
+    </ul>
+
+    <span>Is the compaint body in:</span>
+    <ul>
+    {% for case in original.cases_as_complaint_body.all %}
+    <li><a href="{% url admin:cases_case_change case.id %}">{{ case }}</a></li>
+    {% endfor %}
+    </ul>
+
+    <span>Is the publisher of these articles:</span>
+    <ul>
+    {% for art in original.articles_published.all %}
+    <li><a href="{% url admin:cases_article_change art.id %}">{{ art }}</a></li>
+    {% endfor %}
+    </ul>
+
+    <span>Is the author of these articles:</span>
+    <ul>
+    {% for art in original.articles_authored.all %}
+    <li><a href="{% url admin:cases_article_change art.id %}">{{ art }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
