@@ -13,6 +13,11 @@ class Entity( models.Model ):
     )
     kind = models.CharField( max_length=8, choices=ENTITY_KIND_CHOICES )
 
+
+    def num_uses(self):
+        return self.cases_as_complaint_body.count() + self.cases_as_complainant.count() + self.cases_as_defendant.count() + self.articles_published.count() + self.articles_authored.count()
+
+
     def __unicode__(self):
         return self.name
 

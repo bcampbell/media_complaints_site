@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h2>Important!</h2>
+<p>Please select which record you would like to keep. The selected record's information will be used,
+and all related information from the other records will be moved to it.</p>
+<p>
+<strong>The other records will be deleted.</strong>
+</p>
+<hr />
+<form method="POST" action=".">{% csrf_token %}
+<table class="admin small no_actions">
+    <thead>
+        <tr>
+            <th></th>
+            <th>id</th>
+            <th>name</th>
+            <th>kind</th>
+            <th># cases as defendant</th>
+            <th># cases as complainant</th>
+            <th># cases as complainant body</th>
+            <th># articles published</th>
+            <th># articles authored</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ent in entity_list %}
+        <tr>
+            <td><input type="radio" name="master" value="{{ent.id}}"></td>
+            <td>{{ent.id}}</td>
+            <td>{{ent.name}}</td>
+            <td>{{ent.kind}}</td>
+            <td>{{ent.cases_as_defendant.count}}</td>
+            <td>{{ent.cases_as_complainant.count}}</td>
+            <td>{{ent.cases_as_complaint_body.count}}</td>
+            <td>{{ent.articles_published.count}}</td>
+            <td>{{ent.articles_authored.count}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<br>
+
+{# Request variables from Django Admin's handling of actions. #}
+{% for id in ids %}
+<input type="hidden" name="_selected_action" value="{{ id }}">
+{% endfor %}
+<input type="hidden" name="action" value="merge_entities">
+
+<input type="submit" name="merge" value="Merge" />
+</form>
+
+{% endblock %}
+
