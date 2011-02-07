@@ -75,6 +75,7 @@ class Outcome( models.Model ):
 #        return ('outcome-detail', (), { 'outcome_id': self.id })
 
 class Article( models.Model ):
+    """ a link to a newspaper article or web page """
     url = models.URLField(max_length=512, verify_exists=False, blank=True)
     headline = models.CharField( max_length=256, blank=True )
     pubdate = models.DateField(blank=True,null=True)
@@ -97,6 +98,32 @@ class Case(models.Model):
     title = models.CharField( max_length=512, blank=True )
     summary = models.TextField(blank=True, help_text="short accessible summary of the complaint" )
     complainants = models.ManyToManyField( Entity, related_name='cases_as_complainant', limit_choices_to={'kind':'p'}, help_text="Who made the complaint" )
+
+    # TODO: complainant_type is a big bodge. Doesn't take into account the fact
+    # that cases can have multiple complainants.
+    # What should happen is that this info should be on the entity, and there
+    # should be a proper way to model "on-behalf-of" relationships and job titles...
+    COMPLAINANT_TYPE_CHOICES = (
+        ('public_figure', 'Public Figure'),
+        ('private_individual', 'Private Individual'),
+        ('public_org', 'Public Sector Organisation'),
+        ('private_org', 'Private Sector Organisation'),
+        ('obo_public_figure', 'Solicitor on behalf of a Public Figure'), # (obo="on behalf of")
+        ('obo_private_individual', 'Solicitor on behalf of a Private Individual'),
+        ('obo_public_org', 'Solicitor on behalf of a Public Sector Organisation'),
+        ('obo_private_org', 'Solicitor on behalf of a Private Sector Organisation'),
+
+    )
+    complainant_type = models.CharField( blank=True, max_length=32, choices=COMPLAINANT_TYPE_CHOICES, help_text="nature of complainant" )
+
+    JUDGEMENT_CHOICES = (
+        ('breach', "Newspaper appears to have breached the code"),
+        ('nobreach', "Newspaper appears not to have breached the code"),
+        ('denial', "Newspaper denies breaching the code and the PCC did not make a judgement"),
+        ('nojudgement', "The PCC did not come to a judgement as to whether or not the code was breached"),
+    )
+    judgement = models.CharField( blank=True, max_length=16, choices=JUDGEMENT_CHOICES )
+
     defendants = models.ManyToManyField( Entity,
         related_name='cases_as_defendant',
         limit_choices_to={'kind':'m'} )
@@ -111,8 +138,11 @@ class Case(models.Model):
         help_text="article(s) the complaint is about",
         related_name="cases_as_offending_article" )
 
-    legacy_id = models.CharField(
-        max_length=256,
+    offending_page = models.IntegerField(null=True,blank=True,help_text="Page number of offending article in publication")
+    correction_page = models.IntegerField(null=True,blank=True,help_text="Page number the correction appeared on, if any")
+    correction_date = models.DateField(null=True,blank=True, help_text="Date the correction was published on, if any" )
+
+    legacy_id = models.CharField( blank=True, null=True, max_length=256,
         help_text="eg article_id of the case as published in the PCC CMS system" )
 
     # for the PCC - the report number the case was published in
@@ -140,6 +170,7 @@ class Case(models.Model):
         blank=True,
         help_text="blogs posts, articles etc about this case",
         related_name="cases_as_related_link" )
+
 
     def __unicode__(self):
         return "%s - %s" % (self.id, self.title)

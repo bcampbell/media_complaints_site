@@ -19,14 +19,27 @@ class DetailInline(admin.StackedInline):
 
 class CaseAdmin(admin.ModelAdmin):
     # ...
-    list_display = ('id','title','date_of_complaint','date_of_decision', 'url_of_complaint','checked' )
+    list_display = ('id','title','date_of_decision', 'url_of_complaint','offending_page','correction_info','checked' )
     list_display_links = ('id','title' )
 
-    list_filter = [ 'date_of_decision', 'checked', 'clauses','tags' ]
+    list_filter = [ 'date_of_decision', 'judgement','complainant_type', 'checked', 'clauses','tags' ]
     search_fields = ['title','description','summary']
 #    raw_id_fields = ('related_cases', )
     inlines = [DetailInline,]
     filter_horizontal = ['offending_articles','related_cases','related_links','complainants','defendants','clauses','related_cases','tags']
+
+    def correction_info(self,obj):
+        """ show info about correction, if any """
+
+        # might not have the data
+        if obj.correction_page is None:
+            return ''
+        if obj.offending_page is None:
+            return str(obj.correction_page)
+
+        return "%d (%+d)" % (obj.correction_page, obj.correction_page - obj.offending_page)
+    correction_info.short_description = "correction page"
+
 
 class ArticleAdmin(admin.ModelAdmin):
     filter_horizontal = ['authors',]
