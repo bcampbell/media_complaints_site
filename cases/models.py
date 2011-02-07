@@ -126,6 +126,9 @@ class Case(models.Model):
     # when a descision was published
     date_of_decision = models.DateField(blank=True, null=True, help_text="When the decision was made/published" )
 
+    # enable custom admin filter
+    date_of_decision.year_filter = True
+
     outcome = models.ForeignKey( Outcome, null=True )
 
     url_of_complaint = models.URLField(max_length=512, verify_exists=False, blank=True, help_text="The URL of the complaint on the PCC site")

@@ -1,6 +1,7 @@
 from models import *
 from django.contrib import admin,messages
 
+
 #merge stuff
 from django.utils.safestring import mark_safe
 from django.shortcuts import render_to_response
@@ -8,6 +9,7 @@ from django.template import RequestContext
 from helpers import merge_model_objects
 
 
+from filterspecs import YearFilterSpec
 
 
 class DetailInline(admin.StackedInline):
@@ -20,7 +22,7 @@ class CaseAdmin(admin.ModelAdmin):
     list_display = ('id','title','date_of_complaint','date_of_decision', 'url_of_complaint','checked' )
     list_display_links = ('id','title' )
 
-    list_filter = [ 'checked', 'clauses','tags', 'defendants']
+    list_filter = [ 'date_of_decision', 'checked', 'clauses','tags' ]
     search_fields = ['title','description','summary']
 #    raw_id_fields = ('related_cases', )
     inlines = [DetailInline,]
