@@ -94,9 +94,13 @@ class Case(models.Model):
     """ an case reported to a body (eg someone complaining to the PCC) """
     checked = models.BooleanField()
 
-    complaint_body = models.ForeignKey( Entity, related_name='cases_as_complaint_body', limit_choices_to={'kind':'c'} )
+    complaint_body = models.ForeignKey( Entity, related_name='cases_as_complaint_body', limit_choices_to={'kind':'c'}, help_text='The complaints body handling the case' )
     title = models.CharField( max_length=512, blank=True )
     summary = models.TextField(blank=True, help_text="short accessible summary of the complaint" )
+
+
+    # TODO: need a better way to model complaints "on behalf of" and job titles etc...
+    # eg "Ms Lucy McGee, Director of Communications for the West London Mental Health Trust v Sunday Express"
     complainants = models.ManyToManyField( Entity, related_name='cases_as_complainant', limit_choices_to={'kind':'p'}, help_text="Who made the complaint" )
 
     # TODO: complainant_type is a big bodge. Doesn't take into account the fact
@@ -124,13 +128,14 @@ class Case(models.Model):
     )
     judgement = models.CharField( blank=True, max_length=16, choices=JUDGEMENT_CHOICES )
 
+    # TODO: hmm... maybe should only support a single defendant?
     defendants = models.ManyToManyField( Entity,
         related_name='cases_as_defendant',
         limit_choices_to={'kind':'m'} )
     date_of_complaint = models.DateField(
         blank=True,
         null=True,
-        help_text="When the complaint was lodged" )
+        help_text="When the complaint was lodged, if known" )
 
     complaint = models.TextField(blank=True)
     offending_articles = models.ManyToManyField( Article,
@@ -139,6 +144,7 @@ class Case(models.Model):
         related_name="cases_as_offending_article" )
 
     offending_page = models.IntegerField(null=True,blank=True,help_text="Page number of offending article in publication")
+    offending_date = models.DateField(null=True,blank=True, help_text="Date the offending article was published" )
     correction_page = models.IntegerField(null=True,blank=True,help_text="Page number the correction appeared on, if any")
     correction_date = models.DateField(null=True,blank=True, help_text="Date the correction was published on, if any" )
 

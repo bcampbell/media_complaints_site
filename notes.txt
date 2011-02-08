@@ -1,0 +1,14 @@
+Notes to self on using south to manage schema changes...
+
+
+# to generate a schema migration from some model changes:
+$ ./manage.py schemamigration cases --auto
+
+# to apply the migration:
+$ ./manage.py migrate cases
+
+# to move to a given change:
+$ ./manage.py migrate cases <mirgrationname>
+
+
+
