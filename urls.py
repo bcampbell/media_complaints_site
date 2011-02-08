@@ -8,7 +8,7 @@ from media_complaints_site.cases.models import *
 admin.autodiscover()
 
 case_dict = { 'queryset': Case.objects.all(), }
-clause_dict = { 'queryset': Clause.objects.all(), }
+clause_dict = { 'queryset': Clause.objects.filter(parent=None), }
 tag_dict = { 'queryset': Tag.objects.all(), }
 
 urlpatterns = patterns('',

@@ -13,7 +13,7 @@ v
 {% if forloop.first %}{% else %}/ {% endif %}<a href="{{def.get_absolute_url}}">{{def}}</a>
 {% endfor %}
 about
-{% for c in case.clauses.all %}
+{% for c in case.root_clauses %}
 {% if forloop.first %}{% else %}, {% endif %}<a href="{{c.get_absolute_url}}">{{c}}</a>
 {% endfor %}
 </h2>
@@ -66,7 +66,7 @@ about
 {% for def in case.defendants.all %}
 <li>Cases against <a href="{{def.get_absolute_url}}">{{def}}</a></li>
 {% endfor %}
-{% for c in case.clauses.all %}
+{% for c in case.root_clauses %}
 <li>Cases about <a href="{{c.get_absolute_url}}">{{c}}</a></li>
 {% endfor %}
 </ul>
@@ -89,7 +89,7 @@ about
         <h3>Case summary<h3>
         <h4>Issue(s)<h4>
         <ul>
-            {% for clause in case.clauses.all %}
+            {% for clause in case.root_clauses %}
             <li><a href="{{ clause.get_absolute_url }}">{{clause}}</a></li>
             {% endfor %}
         </ul>

@@ -15,7 +15,7 @@ def entity_detail(request, object_id):
     except Entity.DoesNotExist:
         raise Http404
 
-    clause_stats = Clause.objects.filter( case__defendants__in=(obj,) ).distinct().annotate( num_cases=Count( 'case' ) )
+    clause_stats = Clause.objects.filter( parent=None,case__defendants__in=(obj,) ).distinct().annotate( num_cases=Count( 'case' ) )
     return render_to_response('entity_detail.html', {'ent': obj,'clause_stats': clause_stats })
 
 
@@ -63,7 +63,7 @@ def search(request):
 
     # refine by date
     date_refiner_list = [ Refiner( 'All','all') ]
-    years = range(1996,2011)
+    years = range(1996,2012)    # TODO: get max year from DB!
     years.reverse()
     for year in years:
         date_refiner_list.append( Refiner( str(year), str(year) ) )
@@ -78,7 +78,7 @@ def search(request):
 
 
     # refine by issue
-    issue_refiner_list = [ Refiner( c.prettyname,str(c.id) ) for c in Clause.objects.all().order_by( 'id' ) ]
+    issue_refiner_list = [ Refiner( c.prettyname,str(c.id) ) for c in Clause.objects.filter(parent=None).order_by( 'id' ) ]
     issue_refiner_list.insert(0, Refiner( 'All','all') )
     issue_refine = 'all'
     if ('issue' in request.GET) and request.GET['issue'].strip():
@@ -114,7 +114,7 @@ def front_page(request):
     context['top_defendants'] = Entity.objects.all().annotate( num_cases=Count('cases_as_defendant') ).order_by('-num_cases')[:10]
     context['top_complainants'] = Entity.objects.all().annotate( num_cases=Count('cases_as_complainant') ).order_by('-num_cases')[:10]
     context['top_tags'] = Tag.objects.all().annotate( num_cases=Count('case') ).order_by('-num_cases')[:10]
-    context['top_issues'] = Clause.objects.all().annotate( num_cases=Count('case') ).order_by('-num_cases')
+    context['top_issues'] = Clause.objects.filter(parent=None).annotate( num_cases=Count('case') ).order_by('-num_cases')
 
     #celeb = Tag.objects.get( name='Celebrity' )
     #context['notable_case_list'] = Case.objects.filter( tags__in=[celeb] )

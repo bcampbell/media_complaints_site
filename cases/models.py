@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.signals import m2m_changed
 
 # TODO: add slug fields to things
 
@@ -48,11 +49,18 @@ class Clause( models.Model ):
     """ which code of conduct was (allegedly) violated """
 
     # eg PCC clause number, or OfCom rule
-    ident = models.CharField(max_length=64, help_text="The PCC code" )
-    prettyname = models.CharField(max_length=512)
+    ident = models.CharField(max_length=64, help_text="The PCC code eg '1'" )
+    prettyname = models.CharField(max_length=512, help_text="eg 'Accuracy'")
     explanation = models.TextField( blank=True, help_text="Explanation of clause (markdown formatting)" )
+
+    # subclauses have parent clauses
+    parent = models.ForeignKey('self', blank=True, null=True )
+
     def __unicode__(self):
-        return self.prettyname
+        if self.parent is not None:
+            return unicode(self.parent) + u" - " + self.prettyname
+        else:
+            return self.prettyname
 
     @models.permalink
     def get_absolute_url(self):
@@ -178,6 +186,16 @@ class Case(models.Model):
         related_name="cases_as_related_link" )
 
 
+#    def save(self, *args, **kwargs):
+#        do_something()
+#        super(Blog, self).save(*args, **kwargs) # Call the "real" save() method.
+#        do_something_else()
+
+    def root_clauses(self):
+        """ shortcut to fetch all top-level clauses """
+        return self.clauses.filter( parent=None )
+
+
     def __unicode__(self):
         return "%s - %s" % (self.id, self.title)
 
@@ -187,6 +205,50 @@ class Case(models.Model):
 
     class Meta:
         ordering = ('-date_of_decision', )
+
+
+# we hook into the m2m_changed signal to detect when Case.clauses
+# is being modififed.
+# Whenever the clause list is changed, go through and add any missing
+# parent clauses. So if you add a subclause, the main clause is
+# automatically added too.
+
+# evil nasty hackery to prevent infiniteloopagebadness
+fiddle_case_clauses_LOCK = False
+
+def fiddle_case_clauses(instance, action="post_add", reverse=False, pk_set=[], **kwargs ):
+    """ ensure missing parent clauses are added """
+
+    global fiddle_case_clauses_LOCK
+    if fiddle_case_clauses_LOCK:
+#        print "locked ",action, reverse,pk_set
+        return
+
+#    print "locked ",action, reverse,pk_set
+    if action == 'post_add':
+
+        existing_clauses = instance.clauses.all()
+        missing_clauses = set()
+        for c in existing_clauses:
+            d = c
+            while d.parent is not None:
+                d = d.parent
+                if d not in existing_clauses:
+                    missing_clauses.add(d)
+
+        fiddle_case_clauses_LOCK = True
+#        print "missing clauses: ",missing_clauses
+        if missing_clauses:
+            instance.clauses.add(*missing_clauses)
+        fiddle_case_clauses_LOCK = False
+
+
+
+
+
+m2m_changed.connect( fiddle_case_clauses, sender=Case.clauses.through )
+
+
 
 
 class Detail( models.Model ):

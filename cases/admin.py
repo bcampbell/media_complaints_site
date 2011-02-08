@@ -1,7 +1,6 @@
 from models import *
 from django.contrib import admin,messages
 
-
 #merge stuff
 from django.utils.safestring import mark_safe
 from django.shortcuts import render_to_response
