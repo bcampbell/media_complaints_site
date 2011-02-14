@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | {% trans 'PCC Complaints site admin' %}{% endblock %}
+
+{% block extrastyle %}
+<style>
+a:hover { color: #33C; }
+a:visited { color: #809; }
+a:visited:hover { color: #A3D; }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{% trans 'PCC Complaints site admin' %}</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
