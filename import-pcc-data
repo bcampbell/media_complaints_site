@@ -89,15 +89,9 @@ def load_pcc_clauses():
 def add_case( c ):
     assert( 'url' in c )
 
+    c['Complainant_Name'] = tidy_complainant_name( c['Complainant_Name'], c['Publication'] )
+
     case_title = u"%s v %s" % (c['Complainant_Name'],c['Publication'] )
-
-    # check for crud in title and tidy it (TODO: move into scraper?)
-    borkpat =  re.compile( r'^\s*Resolved\s*-\s*', re.IGNORECASE )
-    if borkpat.search( case_title ):
-        new_title = borkpat.sub( u'', case_title )
-        logging.warn( "tidy title '%s' => '%s'" % (case_title, new_title) )
-        case_title = new_title
-
 
     logging.info( "add '%s' %s - %s" % ( case_title, c['Date_Published'], c['url'] ) )
 
@@ -225,6 +219,21 @@ def add_case( c ):
     return case
 
 
+#TODO: move this into the scraper!
+def tidy_complainant_name(name,publication):
+    """ handle cases where complainant name has whole case title """
+
+    oldname = name
+
+    name = name.replace(u' v ' + publication, u'')
+    borkpat =  re.compile( r'^\s*(Resolved|Adjudication|Adjudicated)\s*-\s*', re.IGNORECASE )
+    name = borkpat.sub( u'', name )
+
+    if name != oldname:
+        logging.warn( "TIDY complainant name '%s' => '%s'" % (oldname, name) )
+    return name
+
+
 
 def main():
     global _opts
@@ -271,6 +280,7 @@ def main():
 #            print "%s %s %s" % ( res, desc, adj )
 
             try:
+
                 # don't add ones we've already got
                 existing = Case.objects.filter( legacy_id = str(c['id']) )
                 if existing:
