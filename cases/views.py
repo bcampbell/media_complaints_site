@@ -174,8 +174,8 @@ def dump(request):
             ','.join([unicode(e) for e in case.clauses.all()]),
             case.complainant_type,
             case.judgement,
-            case.offending_page,
-            case.offending_date,
+            case.offending_page if case.offending_page is not None else u'',
+            case.offending_date if case.offending_date is not None else u'',
             case.date_of_decision,
             ','.join([unicode(t) for t in case.tags.all()]),
             kind]
