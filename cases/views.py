@@ -1,4 +1,4 @@
-# Create your views here.
+import csv
 from django.http import HttpResponse,Http404
 from django.template import Context, loader
 from django.template import RequestContext
@@ -6,6 +6,8 @@ from django.template import RequestContext
 from models import *
 from django.shortcuts import render_to_response
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.contrib.auth.decorators import login_required
+
 
 from django.db.models import Count
 
@@ -122,4 +124,62 @@ def front_page(request):
     context['notable_case_list'] = Case.objects.filter( pk__in=model_cases )
 
     return render_to_response('front_page.html', context)
+
+
+
+
+
+def dump(request):
+    """ dump out csv file of case data """
+    # check for admin
+    if not request.user.is_staff:
+        res = HttpResponse("Unauthorized")
+        res.status_code = 401
+        return res
+
+    found = Case.objects.all()
+
+    year = 'all'
+    if ('year' in request.GET) and request.GET['year'].strip():
+        year = request.GET['year'].strip()
+    if year != 'all':
+        found = found.filter( date_of_decision__year=int(year) )
+
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=pccdump_%s.csv' % (year)
+
+    writer = csv.writer(response)
+
+    fieldnames = ('Title',
+        'Complainant',
+        'Defendant',
+        'Clauses',
+        'Complainant type',
+        'Judgement',
+        'Offending page',
+        'Offending date',
+        'Date of decision',
+        'Chosen tags',
+        'Kind')
+    writer.writerow(fieldnames)
+
+    for case in found:
+        kind = ''
+        detail = case.detail_set.all()[0]
+        kind = detail.kind
+
+        row = [case.title,
+            ','.join([unicode(e) for e in case.complainants.all()]),
+            ','.join([unicode(e) for e in case.defendants.all()]),
+            ','.join([unicode(e) for e in case.clauses.all()]),
+            case.complainant_type,
+            case.judgement,
+            case.offending_page,
+            case.offending_date,
+            case.date_of_decision,
+            ','.join([unicode(t) for t in case.tags.all()]),
+            kind]
+        row = [unicode(s).encode('utf-8') for s in row]
+        writer.writerow(row)
+    return response
 

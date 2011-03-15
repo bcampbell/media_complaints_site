@@ -95,6 +95,7 @@ urlpatterns = patterns('',
             ), ),
     url(r'^search$', 'cases.views.search', name='search'),
     url(r'^about/$', simple.direct_to_template, { 'template': 'about.html' } ),
+    url(r'^dump$', 'cases.views.dump', name='dump'),
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
