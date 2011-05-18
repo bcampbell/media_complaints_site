@@ -102,9 +102,23 @@ def search(request):
     # refine by complainant_type (can select multiple)
     # TODO: switch the other search filters over to use this system
     complainant_type_refiners = [Refiner(foo[1], foo[0]) for foo in Case.COMPLAINANT_TYPE_CHOICES]
-    complainant_type = request.GET.getlist('complainant_type')
-    if len(complainant_type) > 0:
-        found = found.filter(complainant_type__in=complainant_type)
+    complainant_types = request.GET.getlist('complainant_type')
+    if len(complainant_types) > 0:
+        found = found.filter(complainant_type__in=complainant_types)
+
+    # refine by judgement
+    judgement_refiners = [Refiner(foo[1], foo[0]) for foo in Case.JUDGEMENT_CHOICES]
+    judgements = request.GET.getlist('judgement')
+    if len(judgements) > 0:
+        found = found.filter(judgement__in=judgements)
+
+    # refine by defendant
+    defendants = [int(id) for id in request.GET.getlist('defendant')]
+    defendant_refiners = [Refiner(ent.name, ent.id) for ent in Entity.objects.filter(kind__exact='m',cases_as_defendant__date_of_decision__year=2010).distinct()]
+    if len(defendants) > 0:
+        found = found.filter(defendants__in=defendants)
+
+    extra_filters = request.GET.get('extra',False) or len(defendants)>0 or len(complainant_types)>0 or len(judgements)>0
 
     return render_to_response('search.html',
                           { 'query_string': query_string,
@@ -115,8 +129,13 @@ def search(request):
                             'issue_refiner_list': issue_refiner_list,
                             'outcome_refine': outcome_refine,
                             'outcome_refiner_list': outcome_refiner_list,
-                            'complainant_type': complainant_type,
+                            'complainant_types': complainant_types,
                             'complainant_type_refiners': complainant_type_refiners,
+                            'judgements': judgements,
+                            'judgement_refiners': judgement_refiners,
+                            'defendants': defendants,
+                            'defendant_refiners': defendant_refiners,
+                            'extra_filters': extra_filters,
                           },
                           context_instance=RequestContext(request))
 

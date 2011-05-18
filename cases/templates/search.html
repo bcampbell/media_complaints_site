@@ -56,13 +56,29 @@
 </div>
 
 
-{% if complainant_type %}
+{% if extra_filters %}
+
 <div class="search-refiners">
-<h4>complainant type:</h4>
+<h4>complainant type (for 2010 only):</h4>
 <ul>
-{% refiner_list complainant_type complainant_type_refiners complainant_type %}
+{% refiner_list complainant_type complainant_type_refiners complainant_types %}
 </ul>
 </div>
+
+<div class="search-refiners">
+<h4>judgement (for 2010 only):</h4>
+<ul>
+{% refiner_list judgement judgement_refiners judgements %}
+</ul>
+</div>
+
+<div class="search-refiners">
+<h4>defendants (for 2010 only):</h4>
+<ul>
+{% refiner_list defendant defendant_refiners defendants %}
+</ul>
+</div>
+
 {% endif %}
 
 
