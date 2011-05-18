@@ -6,6 +6,8 @@
 <h2>Search for cases</h2>
 
 {% load add_get_parameter %}
+{% load refiners %}
+
 <div id="refiners" class="box">
 <h3>Refine your results by...</h3>
 <div class="search-refiners">
@@ -52,6 +54,17 @@
 {% endfor %}
 </ul>
 </div>
+
+
+{% if complainant_type %}
+<div class="search-refiners">
+<h4>complainant type:</h4>
+<ul>
+{% refiner_list complainant_type complainant_type_refiners complainant_type %}
+</ul>
+</div>
+{% endif %}
+
 
 </div>
 

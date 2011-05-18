@@ -98,6 +98,14 @@ def search(request):
     if outcome_refine != 'all':
         found = found.filter( outcome__id=outcome_refine )
 
+
+    # refine by complainant_type (can select multiple)
+    # TODO: switch the other search filters over to use this system
+    complainant_type_refiners = [Refiner(foo[1], foo[0]) for foo in Case.COMPLAINANT_TYPE_CHOICES]
+    complainant_type = request.GET.getlist('complainant_type')
+    if len(complainant_type) > 0:
+        found = found.filter(complainant_type__in=complainant_type)
+
     return render_to_response('search.html',
                           { 'query_string': query_string,
                             'case_list': found,
@@ -107,6 +115,8 @@ def search(request):
                             'issue_refiner_list': issue_refiner_list,
                             'outcome_refine': outcome_refine,
                             'outcome_refiner_list': outcome_refiner_list,
+                            'complainant_type': complainant_type,
+                            'complainant_type_refiners': complainant_type_refiners,
                           },
                           context_instance=RequestContext(request))
 
