@@ -94,6 +94,7 @@ urlpatterns = patterns('',
             template_object_name="article"
             ), ),
     url(r'^search$', 'cases.views.search', name='search'),
+    url(r'^timings_2010$', 'cases.views.timings_2010', name='timings_2010'),
     url(r'^about/$', simple.direct_to_template, { 'template': 'about.html' } ),
     url(r'^dump$', 'cases.views.dump', name='dump'),
 

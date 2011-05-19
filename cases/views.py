@@ -212,3 +212,13 @@ def dump(request):
         writer.writerow(row)
     return response
 
+
+def timings_2010(request):
+
+    found = Case.objects.filter(date_of_decision__year=2010)
+    return render_to_response('timings_2010.html',
+                          {
+                            'case_list': found,
+                          },
+                          context_instance=RequestContext(request))
+

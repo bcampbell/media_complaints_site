@@ -4,6 +4,7 @@
 /*
  * GENERIC SITE-WIDE STUFF
  */
+small { font-size: small; }
 
 a:visited { color: #809; }
 a:hover { color: #33C; }

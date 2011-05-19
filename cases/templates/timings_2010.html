@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Timings (2010){% endblock %}
+
+{% block content %}
+<h2>Timings (2010)</h2>
+
+
+<p>{{ case_list.count }} cases:</p>
+{% load pagination_tags %}
+{% autopaginate case_list 5000 %}
+
+<table>
+<tr>
+ <th>case</th>
+ <th>offending date<br/><small>(publication date of offending article)</small></th>
+<th>date of decision<br/><small>(when decision was published)</small></th>
+</tr>
+{% for case in case_list %}
+<tr>
+    <td><a href="{{ case.get_absolute_url }}">{{case.title}}</a></td>
+<td>{{case.offending_date|default_if_none:"unknown"}}</td>
+<td>{{case.date_of_decision}}</td>
+</tr>
+{% endfor %}
+</table>
+{% paginate %}
+
+
+
+
+{% endblock %}
