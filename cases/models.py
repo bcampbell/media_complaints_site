@@ -195,6 +195,13 @@ class Case(models.Model):
         """ shortcut to fetch all top-level clauses """
         return self.clauses.filter( parent=None )
 
+    def time_to_decision(self):
+        """ return time difference between offending article and decision being issued. Or None if unavailable. """
+        if self.offending_date is None or self.date_of_decision is None:
+            return None
+        else:
+            return self.date_of_decision - self.offending_date
+
 
     def __unicode__(self):
         return "%s - %s" % (self.id, self.title)

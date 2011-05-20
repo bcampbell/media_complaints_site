@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.decorators import login_required
 
+import datetime
 
 from django.db.models import Count
 
@@ -216,9 +217,18 @@ def dump(request):
 def timings_2010(request):
 
     found = Case.objects.filter(date_of_decision__year=2010)
+    found = list(found)
+#    found.sort(key=Case.time_to_decision)
+
+    foo = (c.time_to_decision() for c in found)
+    foo = [t for t in foo if t is not None]
+    avg = sum(foo, datetime.timedelta(0)) / len(foo)
+
+   
     return render_to_response('timings_2010.html',
                           {
                             'case_list': found,
+                            'avg_time': avg,
                           },
                           context_instance=RequestContext(request))
 

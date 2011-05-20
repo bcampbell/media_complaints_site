@@ -6,25 +6,28 @@
 <h2>Timings (2010)</h2>
 
 
-<p>{{ case_list.count }} cases:</p>
-{% load pagination_tags %}
-{% autopaginate case_list 5000 %}
+<p>average elapsed time to decision: {{avg_time.days}} days</p>
 
 <table>
 <tr>
  <th>case</th>
  <th>offending date<br/><small>(publication date of offending article)</small></th>
 <th>date of decision<br/><small>(when decision was published)</small></th>
+<th>elapsed time</th>
 </tr>
 {% for case in case_list %}
 <tr>
     <td><a href="{{ case.get_absolute_url }}">{{case.title}}</a></td>
 <td>{{case.offending_date|default_if_none:"unknown"}}</td>
 <td>{{case.date_of_decision}}</td>
+<td>
+{% if case.time_to_decision %}
+{{case.time_to_decision.days}} days
+{% endif %}
+</td>
 </tr>
 {% endfor %}
 </table>
-{% paginate %}
 
 
 
