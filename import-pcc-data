@@ -42,13 +42,15 @@ _opts = None
 
 def slurp_batch( offset, limit ):
 
-    url = "http://api.scraperwiki.com/api/1.0/datastore/getdata"
+#    url = "http://api.scraperwiki.com/api/1.0/datastore/getdata"
+#    params = { 'format': 'json',
+#        'name': 'pcc-decisions-mark-3',
+#        'limit': str(limit),
+#        'offset': str(offset) }
+#    url = url + "?" + urllib.urlencode( params )
 
-    params = { 'format': 'json',
-        'name': 'pcc-decisions-mark-3',
-        'limit': str(limit),
-        'offset': str(offset) }
-    url = url + "?" + urllib.urlencode( params )
+    url = "http://api.scraperwiki.com/api/1.0/datastore/sqlite?format=jsondict&name=pcc-decisions-mark-3&query=select%20*%20from%20swdata%20limit%20" + str(limit) + "%20offset%20" + str(offset)
+
     f = urllib2.urlopen( url )
     json_data = f.read()
 #    print json_data
@@ -89,11 +91,11 @@ def load_pcc_clauses():
 def add_case( c ):
     assert( 'url' in c )
 
-    c['Complainant_Name'] = tidy_complainant_name( c['Complainant_Name'], c['Publication'] )
+    c['complainant_name'] = tidy_complainant_name( c['complainant_name'], c['publication'] )
 
-    case_title = u"%s v %s" % (c['Complainant_Name'],c['Publication'] )
+    case_title = u"%s v %s" % (c['complainant_name'],c['publication'] )
 
-    logging.info( "add '%s' %s - %s" % ( case_title, c['Date_Published'], c['url'] ) )
+    logging.info( "add '%s' %s - %s" % ( case_title, c['date_published'], c['url'] ) )
 
     # incoming fields:
     #
@@ -110,13 +112,13 @@ def add_case( c ):
     # Clauses_Noted
     # Complaint         text summary
 
-    if c['Clauses_Noted'].strip().lower() == 'none':
-        c['Clauses_Noted'] = u''
-    date_published = dateutil.parser.parse( c['Date_Published'], dayfirst=True )
+    if c['clauses_noted'].strip().lower() == 'none':
+        c['clauses_noted'] = u''
+    date_published = dateutil.parser.parse( c['date_published'], dayfirst=True )
     assert( date_published is not None )
 
     if date_published > datetime.datetime.now():
-        logging.warning( "skip case with future date (%s) %s" % (c['Date_Published'],c['url']))
+        logging.warning( "skip case with future date (%s) %s" % (c['date_published'],c['url']))
         return
 
 
@@ -130,11 +132,12 @@ def add_case( c ):
 
 
     outcome = None
-    if 'Resolution' in c:
+    if c.get('resolution',''):
         outcome = u'Resolved'
-    elif 'Decision' in c:
-        assert 'Adjudication' in c
-        outcome = c['Decision']
+    elif c.get('decision',''):
+        assert 'adjudication' in c
+        assert c['adjudication']
+        outcome = c['decision']
     if outcome is None:
         raise Exception( "%s: couldn't decide outcome" % (c['url']) )
 
@@ -145,13 +148,14 @@ def add_case( c ):
     case.legacy_id = str( c['id'] )
     case.date_of_decision = date_published
     case.url_of_complaint = c['url']
-    case.complaint = c['Complaint']
+    case.complaint = c['complaint']
     case.complaint_body = the_pcc
 
-    case.date_scraped = dateutil.parser.parse( c['date_scraped'], dayfirst=True )
+#    case.date_scraped = dateutil.parser.parse( c['date_scraped'], dayfirst=True )
+    case.date_scraped = None
 
-    if 'Report' in c:
-        case.report = c['Report']
+    if c.get('report',None):
+        case.report = c['report']
 
     case.title = case_title
 
@@ -162,7 +166,7 @@ def add_case( c ):
     # clauses
     # check and store them for later adding (m2m)
     pcc_clause_objs = []
-    clause_idents = set( [ clause.strip() for clause in c['Clauses_Noted'].split(',') ] )
+    clause_idents = set( [ clause.strip() for clause in c['clauses_noted'].split(',') ] )
     for ident in clause_idents:
         if ident == u'':
             continue
@@ -180,7 +184,7 @@ def add_case( c ):
     #  "Mrs Pauline Dunn on behalf of her niece, Mrs Wendy Barlow"
     #    etc...
     complainant_objs = []
-    complainant,created = Entity.objects.get_or_create( name=c['Complainant_Name'], kind='p' )
+    complainant,created = Entity.objects.get_or_create( name=c['complainant_name'], kind='p' )
     complainant_objs.append( complainant )
     if created:
         complainant.save()
@@ -188,9 +192,9 @@ def add_case( c ):
     # who they are complaining about
     # nice and easy to identify multiples:
 
-    publications = re.split( r'\s*/\s*', c['Publication'] )
+    publications = re.split( r'\s*/\s*', c['publication'] )
     if len( publications ) >1:
-        logging.info( "split multiple publications: %s=>%s" % ( c['Publication'], publications ) )
+        logging.info( "split multiple publications: %s=>%s" % ( c['publication'], publications ) )
     defendant_objs = []
     for publication in publications:
         about,created = Entity.objects.get_or_create( name=publication, kind='m' )
@@ -208,18 +212,17 @@ def add_case( c ):
 
 
     # now add the details to the case
-    if "Resolution" in c:
-        resolution = Detail( content=c['Resolution'], kind='resolution', case=case )
+    if c.get("resolution",''):
+        resolution = Detail( content=c['resolution'], kind='resolution', case=case )
         resolution.save()
 
-    if "Adjudication" in c:
-        adj = Detail( content=c['Adjudication'], kind='adjudication', case=case )
+    if c.get("adjudication", '' ):
+        adj = Detail( content=c['adjudication'], kind='adjudication', case=case )
         adj.save()
 
     return case
 
 
-#TODO: move this into the scraper!
 def tidy_complainant_name(name,publication):
     """ handle cases where complainant name has whole case title """
 
@@ -286,7 +289,7 @@ def main():
                 if existing:
                     # TODO: check for changes?
                     continue
-                if 'Publication' not in c:
+                if 'publication' not in c:
                     logging.warning( "skip blank record %s" % ( c['url'], ) )
                     continue
                 new_cnt += 1
