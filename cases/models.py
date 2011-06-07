@@ -12,12 +12,19 @@ class Entity( models.Model ):
         ('c', 'Complaints Body'),
         ('m', 'Media'),
     )
-    kind = models.CharField( max_length=8, choices=ENTITY_KIND_CHOICES )
 
+    ENTITY_PUBLICATION_TYPE_CHOICES = (
+        ('uklocal', 'UK local newspaper'),
+        ('uknational', 'UK national newspaper'),
+        ('ukmag', 'UK magazine'),
+    )
+
+    kind = models.CharField(max_length=8, choices=ENTITY_KIND_CHOICES)
+
+    publication_type = models.CharField(max_length=16, blank=True, null=True, choices=ENTITY_PUBLICATION_TYPE_CHOICES)
 
     def num_uses(self):
         return self.cases_as_complaint_body.count() + self.cases_as_complainant.count() + self.cases_as_defendant.count() + self.articles_published.count() + self.articles_authored.count()
-
 
     def __unicode__(self):
         return self.name

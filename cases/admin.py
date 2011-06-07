@@ -47,11 +47,11 @@ class ArticleAdmin(admin.ModelAdmin):
 
 class EntityAdmin(admin.ModelAdmin):
     # ...
-    list_display = ('id','name','kind','num_uses' )
+    list_display = ('id','name','kind','publication_type','num_uses' )
     list_display_links = ('id','name' )
-    list_filter = [ 'kind', ]
+    list_filter = [ 'kind','publication_type' ]
     search_fields = ['name',]
-    actions = [ 'merge_entities' ]
+    actions = ['merge_entities', 'set_uklocal', 'set_uknational', 'set_ukmag']
 
     def merge_entities(modeladmin,request,queryset):
         if queryset.count() < 2:
@@ -78,6 +78,12 @@ class EntityAdmin(admin.ModelAdmin):
     merge_entities.short_description = "Merge selected entities"
 
 
+    def set_uklocal(modeladmin,request,queryset):
+        queryset.update(publication_type='uklocal')
+    def set_uknational(modeladmin,request,queryset):
+        queryset.update(publication_type='uknational')
+    def set_ukmag(modeladmin,request,queryset):
+        queryset.update(publication_type='ukmag')
 
 
 admin.site.register(Entity,EntityAdmin)

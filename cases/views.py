@@ -119,6 +119,13 @@ def search(request):
     if len(defendants) > 0:
         found = found.filter(defendants__in=defendants)
 
+    # refine by publication type (entity sub_kind)
+    publication_type_refiners = [Refiner(foo[1], foo[0]) for foo in Entity.ENTITY_PUBLICATION_TYPE_CHOICES]
+    publication_types = request.GET.getlist('publication_type')
+    if len(publication_types) > 0:
+        found = found.filter(defendants__publication_type__in=publication_types)
+
+
     extra_filters = request.GET.get('extra',False) or len(defendants)>0 or len(complainant_types)>0 or len(judgements)>0
 
     return render_to_response('search.html',
@@ -132,6 +139,8 @@ def search(request):
                             'outcome_refiner_list': outcome_refiner_list,
                             'complainant_types': complainant_types,
                             'complainant_type_refiners': complainant_type_refiners,
+                            'publication_types': publication_types,
+                            'publication_type_refiners': publication_type_refiners,
                             'judgements': judgements,
                             'judgement_refiners': judgement_refiners,
                             'defendants': defendants,
