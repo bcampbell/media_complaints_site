@@ -66,7 +66,7 @@ def search(request):
 
     # refine by date
     date_refiner_list = [ Refiner( 'All','all') ]
-    years = range(1996,2012)    # TODO: get max year from DB!
+    years = range(1996,2013)    # TODO: get max year from DB!
     years.reverse()
     for year in years:
         date_refiner_list.append( Refiner( str(year), str(year) ) )
