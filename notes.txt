@@ -1,5 +1,5 @@
-Notes to self on using south to manage schema changes...
-
+Using south to manage schema changes
+------------------------------------
 
 # to generate a schema migration from some model changes:
 $ ./manage.py schemamigration cases --auto

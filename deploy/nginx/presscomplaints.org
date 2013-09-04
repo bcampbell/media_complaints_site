@@ -1,0 +1,32 @@
+# vim: set filetype=nginx:
+
+
+
+server{
+	server_name presscomplaints.org;
+	access_log /srv/vhost/presscomplaints.org/logs/access.log;
+	error_log /srv/vhost/presscomplaints.org/logs/error.log;
+	
+	location /{
+		uwsgi_pass 127.0.0.1:49159;
+		include uwsgi_params;
+#		uwsgi_param UWSGI_APPID presscomplaints;
+#		uwsgi_param UWSGI_FILE /srv/vhost/presscomplaints.org/media_complaints_site/django.wsgi;
+#                uwsgi_param UWSGI_CHDIR /srv/vhost/presscomplaints.org/media_complaints_site/;
+#                uwsgi_param UWSGI_PYHOME /srv/vhost/presscomplaints.org/env/;		
+		root /srv/vhost/presscomplaints.org/media_complaints_site/;
+	}
+
+	location /static {
+		alias /srv/vhost/presscomplaints.org/media_complaints_site/cases/static;
+	}
+    
+	location /adminmedia {
+		alias /srv/vhost/presscomplaints.org/env/lib/python2.7/site-packages/django/contrib/admin/media;
+	}
+}
+
+server {
+        server_name  *.presscomplaints.org; 
+    	return 301 $scheme://presscomplaints.org$request_uri;
+}
