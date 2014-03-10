@@ -91,3 +91,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
+
+# morph.io API key to access data from the pcc scraper
+MORPH_IO_API_KEY = 'YOUR_KEY_HERE'
+
