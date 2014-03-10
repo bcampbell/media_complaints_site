@@ -18,7 +18,7 @@ class YearFilterSpec(DateFieldFilterSpec):
 
         # TODO: should be cleverer about the range, and get the
         # extents from the DB.
-        for year in range(2012,1995,-1):
+        for year in range(2014,1995,-1):
             self.links.append( ((str(year)), {'%s__year' % self.field.name: str(year), }) )
 
 
