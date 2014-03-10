@@ -12,3 +12,18 @@ $ ./manage.py migrate cases <mirgrationname>
 
 
 
+
+django upgrade notes
+--------------------
+
+Currently using very old version of django (1.2.x).
+
+Lots of little things to upgrade:
+
+per-year filters in admin: used to use contrib FilterSpecs, but that's been
+replaced:
+https://docs.djangoproject.com/en/dev/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+
+manage.py needs upgrade: execute_manager() removed in 1.5/1.6
+
+
