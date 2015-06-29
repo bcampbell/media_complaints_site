@@ -1,6 +1,0 @@
-Django
-python-dateutil
-django-pagination
-South
-Markdown
-
